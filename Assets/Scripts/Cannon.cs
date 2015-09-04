@@ -43,11 +43,11 @@ public class CannonStats{
 	public static CannonStats DefaultCannon{
 	get{
 			CannonStats stats = new CannonStats();
-			stats.cooldownDuration = 0.5f;
+			stats.cooldownDuration = 0.4f;
 			stats.maxBulletAmount = -1;
 			stats.bulletStats = new BulletStats();
-			stats.bulletStats.bulletType = BulletType.NORMAL;
-			stats.bulletStats.speed = 5f;
+			stats.bulletStats.bulletType = BulletType.EXPLODING;
+			stats.bulletStats.speed = 25f;
 			return stats;
 		}
 	}

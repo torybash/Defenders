@@ -9,10 +9,18 @@ public class GameController : MonoBehaviour {
 	WaveController waveCtrl;
 	UIController uiCtrl;
 
+	//Object references
+	[Header("References")]
+	[SerializeField] Transform cannonMidPos;
+	[SerializeField] Transform cannonRightPos;
+	[SerializeField] Transform cannonLeftPos;
+
 	//Prefabs
+	[Header("Prefabs")]
 	[SerializeField] GameObject scaffoldingPrefab;
 	[SerializeField] GameObject buildingSelectorPrefab;
 	[SerializeField] GameObject turretPrefab;
+	[SerializeField] GameObject explosionPrefab;
 
 	//Constants
 	const int scaffoldsAmount = 8;
@@ -57,14 +65,14 @@ public class GameController : MonoBehaviour {
 		case GameState.GAME:
 			Vector2 mousePos = camCtrl.cam.ScreenToWorldPoint(Input.mousePosition);
 			Shooting(mousePos);
-			BuildingClicking(mousePos);
+//			BuildingClicking(mousePos);
 
 
 			break;
 		case GameState.INGAME_MENU:
 			//TODO/DEBUG
 			if (Input.GetMouseButtonDown(0)){
-				ConstructTurret();
+//				ConstructTurret();
 			}
 			break;
 		default:
@@ -104,6 +112,10 @@ public class GameController : MonoBehaviour {
 	
 
 	private void Init(){
+		//Set values
+		cannons = new List<Cannon>();
+		state = GameState.GAME;
+
 		//Spawn scaffolding
 		Vector2 spawnPos = new Vector2(0, scaffoldsYPos);
 		for (int i = 0; i < scaffoldsAmount; i++) {
@@ -115,26 +127,25 @@ public class GameController : MonoBehaviour {
 
 		}
 
-		//Set values
-		cannons = new List<Cannon>();
-		state = GameState.GAME;
+		//Spawn mid turret
+		ConstructTurret(cannonMidPos.position);
 	}
 
 
-	private void ConstructTurret(){
-		if (selectedBuilding == null) throw new UnassignedReferenceException("selectedScaffold == null");
+	private void ConstructTurret(Vector2 pos){
+//		if (selectedBuilding == null) throw new UnassignedReferenceException("selectedScaffold == null");
 
 		//Hide selector
-		buildingSelector.gameObject.SetActive(false);
+//		buildingSelector.gameObject.SetActive(false);
 
 		//Create turret
-		GameObject cannonT = (GameObject) Instantiate(turretPrefab, selectedBuilding.transform.position, Quaternion.identity);
+		GameObject cannonT = (GameObject) Instantiate(turretPrefab, pos, Quaternion.identity);
 		Cannon cannon = cannonT.GetComponent<Cannon>();
 		cannon.Init(CannonStats.DefaultCannon);
 
 		//Destroy scaffold
-		GameObject.Destroy(selectedBuilding.gameObject);
-		selectedBuilding = null;
+//		GameObject.Destroy(selectedBuilding.gameObject);
+//		selectedBuilding = null;
 
 		//Set values
 		cannons.Add(cannon);
@@ -147,6 +158,13 @@ public class GameController : MonoBehaviour {
 	}
 
 	public void WaveDestroyed(){
+
+	}
+
+
+	public void MakeExplosionAt(Vector2 pos){
+		GameObject explosionGO = (GameObject) Instantiate(explosionPrefab, pos, Quaternion.identity);
+		explosionGO.GetComponent<Explosion>().Init();
 
 	}
 
