@@ -8,21 +8,53 @@ public class Enemy : MonoBehaviour {
 
 	Vector2 vel = Vector2.zero;
 
-	void Update () {
-//		transform.Translate(vel * Time.deltaTime);
+	GameController gameCtrl;
+
+	Building currTarget;
+
+	Rigidbody2D rb;
+
+	void Awake(){
+		gameCtrl = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+
+		rb = GetComponent<Rigidbody2D>();
 	}
 
+	void Update () {
+//		transform.Translate(vel * Time.deltaTime);
+
+		if (currTarget != null && currTarget.isDestroyed){
+			UpdateGoalPos();
+		}
+	}
+
+	private void UpdateGoalPos(){
+		currTarget = gameCtrl.buildingCtrl.GetClosestBuilding(transform.position);
+		Vector2 goalPos = Vector2.zero;
+		if (currTarget == null){
+			goalPos = transform.position;
+		}else{
+			goalPos = currTarget.transform.position;
+		}
+		
 
 
-	public void Init(EnemyType type, Vector2 goalPos){
-
+		GetComponent<Rigidbody2D>().AddForce(-rb.velocity, ForceMode2D.Impulse); //stop velocity
 		vel = (goalPos - (Vector2)transform.position).normalized * speed;
 		GetComponent<Rigidbody2D>().AddForce(vel, ForceMode2D.Impulse);
 	}
 
 
+	public void Init(EnemyType type){
+		UpdateGoalPos();
+	}
+
+
 	public void GotHit(){
 		//Debug
+
+		gameCtrl.waveCtrl.EnemyKilled(this);
+
 		GameObject.Destroy(gameObject);
 	}
 
@@ -34,11 +66,11 @@ public class Enemy : MonoBehaviour {
 
 			building.GotHit();
 
-			GameObject.Destroy(gameObject);
+			GotHit();
 
 
 		}else if (coll.GetComponent<Explosion>() != null){
-			GameObject.Destroy(gameObject);
+			GotHit();
 		}
 	}
 }

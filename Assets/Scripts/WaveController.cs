@@ -16,6 +16,8 @@ public class WaveController : MonoBehaviour {
 
 	int wavePartIncr;
 
+	Dictionary<int, Enemy> currWaveEnemies;
+
 	//Controller ref
 	GameController gameCtrl;
 
@@ -33,6 +35,8 @@ public class WaveController : MonoBehaviour {
 		currWave = waves[gameCtrl.currWave];
 		waveStartTime = Time.time;
 		wavePartIncr = 0;
+
+		currWaveEnemies = new Dictionary<int, Enemy>();
 	}
 
 	private void CurrentWaveOver(){
@@ -40,7 +44,22 @@ public class WaveController : MonoBehaviour {
 		//TODO
 
 		//DEBUG restart
-		StartCurrentWave();
+//		StartCurrentWave();
+	}
+
+
+	public bool IsCurrentWaveComplete(){
+		if (currWave == null && currWaveEnemies.Count == 0) return true;
+		return false;
+	}
+
+	public void EnemyKilled(Enemy enemy){
+		if (currWaveEnemies.ContainsKey(enemy.gameObject.GetInstanceID())){
+			currWaveEnemies.Remove(enemy.gameObject.GetInstanceID());
+		}
+		if (IsCurrentWaveComplete()){
+			gameCtrl.WaveCompleted();
+		}
 	}
 
 	public void GUpdate(){
@@ -55,14 +74,21 @@ public class WaveController : MonoBehaviour {
 			WavePart part = currWave.waveParts[wavePartIncr];
 			if (Time.time > waveStartTime + part.time){
 				foreach (WaveEnemy waveEnemy in part.enemies) {
-					GameObject enemyGO = (GameObject) Instantiate(enemyPrefab, new Vector2(waveEnemy.startX, gameCtrl.GetEnemySpawnPosY()), Quaternion.identity);
+					GameObject enemyGO = (GameObject) Instantiate(enemyPrefab, new Vector2(waveEnemy.startX, gameCtrl.enemySpawnYPos), Quaternion.identity);
 					Enemy enemy = enemyGO.GetComponent<Enemy>();
-					enemy.Init(waveEnemy.type, new Vector2(waveEnemy.goalX, gameCtrl.GetEnemyGoalPosY()));
+					enemy.Init(waveEnemy.type);
+					currWaveEnemies.Add(enemyGO.GetInstanceID(), enemy);
 				}
 
 				wavePartIncr++;
 			}
 		}
+	}
+
+
+	public int GetAmountMoneyForWave(int waveNr){
+		//TODO
+		return (waveNr + 1) * 100;
 	}
 }
 

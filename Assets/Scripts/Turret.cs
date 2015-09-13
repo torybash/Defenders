@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Cannon : MonoBehaviour {
+public class Turret : MonoBehaviour {
 
 	//Inspector refs
 	[Header("References")]
@@ -14,41 +14,63 @@ public class Cannon : MonoBehaviour {
 	//Variables
 	float nextShotTime;
 
-	CannonStats stats;
+	public TurretStats stats;
 
-	public void Init(CannonStats stats){
-		this.stats = stats;
+	Building building;
+
+
+
+	void Awake(){
+		building = GetComponent<Building>();
 	}
 
-	public void TryShootAt(Vector2 pos){
+	public void Init(TurretStats stats){
+		this.stats = stats;
+
+	}
+
+	public bool TryShootAt(Vector2 pos){
+		if (building.isDestroyed) return false;
 
 		if (Time.time > nextShotTime){
 			ShootAt(pos);
 			nextShotTime = Time.time + stats.cooldownDuration;
+
+			return true;
 		}
+		return false;
 	}
 
 	public void ShootAt(Vector2 pos){
 		GameObject bulletGO = (GameObject) Instantiate(bulletPrefab, bulletSpawnPosT.position, Quaternion.identity);
 		Bullet bullet = bulletGO.GetComponent<Bullet>();
-		bullet.Init(pos, stats.bulletStats);
+		bullet.Init(pos, stats.type, stats.bulletSpeed);
 	}
 }
 
-public class CannonStats{
+public class TurretStats{
+	public ProjectileType type;
 	public float cooldownDuration;
 	public int maxBulletAmount;
-	public BulletStats bulletStats;
+	public float bulletSpeed;
+	public int ammoMax;
 
-	public static CannonStats DefaultCannon{
+	public static TurretStats DefaultTurret{
 	get{
-			CannonStats stats = new CannonStats();
+			TurretStats stats = new TurretStats();
 			stats.cooldownDuration = 0.4f;
 			stats.maxBulletAmount = -1;
-			stats.bulletStats = new BulletStats();
-			stats.bulletStats.bulletType = BulletType.EXPLODING;
-			stats.bulletStats.speed = 25f;
+			stats.type = ProjectileType.EXPLODING;
+			stats.bulletSpeed = 15f;
+			stats.ammoMax = 10;
 			return stats;
 		}
 	}
+}
+
+
+public enum ProjectileType{
+	NORMAL,
+	EXPLODING,
+	AMOUNT
 }

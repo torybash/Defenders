@@ -4,10 +4,15 @@ using System.Collections.Generic;
 
 public class GameController : MonoBehaviour {
 
-	//Controller refs
-	CameraController camCtrl;
-	WaveController waveCtrl;
-	UIController uiCtrl;
+	//Controller/library refs
+	public CameraController camCtrl;
+	public WaveController waveCtrl;
+	public UIController uiCtrl;
+	public BuildingController buildingCtrl;
+
+	public BuildingLibrary buildingLib;
+	public SpriteLibrary spriteLib;
+
 
 	//Object references
 	[Header("References")]
@@ -17,43 +22,58 @@ public class GameController : MonoBehaviour {
 
 	//Prefabs
 	[Header("Prefabs")]
-	[SerializeField] GameObject scaffoldingPrefab;
-	[SerializeField] GameObject buildingSelectorPrefab;
-	[SerializeField] GameObject turretPrefab;
+
 	[SerializeField] GameObject explosionPrefab;
 
 	//Constants
-	const int scaffoldsAmount = 8;
-	const float scaffoldsYPos = -6.5f;
-	const float enemySpawnYPos = 8.5f;
-	const float enemyGoalYPos = -6.5f;
-	const float height = 16f;
-	const float width = 10f;
+	public float scaffoldsYPos = -6f;
+	public float enemySpawnYPos = 8.5f;
+	public float enemyGoalYPos = -6.5f;
+	public float height = 16f;
+	public float width = 10f;
+	public int buildFieldWidth = 9;
+	public int buildFieldHeight = 3;
+	public float buildingFieldYAboveBottom = 3.5f;
+
+	public float endWaveDuration = 6f;
 
 	//Variables & refs
 	GameState state;
-
-	GameObject selectedBuilding;
-	GameObject buildingSelector;
+	IntermissionState intmsnState;
 
 
-	List<Cannon> cannons;
+
 
 	public int currWave;
 	public int score;
 	public int highscore;
 	public int money;
+	public int powerUse;
+	public int powerMax;
+
+	public Dictionary<ProjectileType, int> turretAmmo = new Dictionary<ProjectileType, int>();
+
 
 	void Awake(){
 		camCtrl = GetComponent<CameraController>();
 		waveCtrl = GetComponent<WaveController>();
 		uiCtrl = GetComponent<UIController>();
+		buildingCtrl = GetComponent<BuildingController>();
+
+		buildingLib = GameObject.FindGameObjectWithTag("GameLibrary").GetComponent<BuildingLibrary>();
+		spriteLib = GameObject.FindGameObjectWithTag("GameLibrary").GetComponent<SpriteLibrary>();
+
+		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
+			turretAmmo.Add((ProjectileType) i, 0);
+		}
 	}
 
 
 	void Start(){
 		camCtrl.Init();
 		waveCtrl.Init();
+		buildingCtrl.Init();
+		uiCtrl.Init();
 		Init();
 
 		//DEBUG
@@ -61,19 +81,32 @@ public class GameController : MonoBehaviour {
 	}
 	
 	void Update () {
+		Vector2 mousePos = camCtrl.cam.ScreenToWorldPoint(Input.mousePosition);
+		bool mousePressed = Input.GetMouseButton(0);
 		switch (state) {
 		case GameState.GAME:
-			Vector2 mousePos = camCtrl.cam.ScreenToWorldPoint(Input.mousePosition);
-			Shooting(mousePos);
-//			BuildingClicking(mousePos);
+
+			if (mousePressed){
+				Shooting(mousePos);
+				if (mousePressed) buildingCtrl.BuildingClicking(mousePos);
+			}
 
 
 			break;
-		case GameState.INGAME_MENU:
-			//TODO/DEBUG
-			if (Input.GetMouseButtonDown(0)){
-//				ConstructTurret();
+		case GameState.INTERMISSION:
+
+			switch (intmsnState) {
+			case IntermissionState.NORMAL:
+				if (mousePressed) buildingCtrl.BuildingClicking(mousePos);
+				break;
+			case IntermissionState.PLACING_BUILDING:
+				if (mousePressed) buildingCtrl.PlacingBuildingClicking(mousePos);
+				break;
+			default:
+			break;
 			}
+
+
 			break;
 		default:
 			break;
@@ -83,84 +116,106 @@ public class GameController : MonoBehaviour {
 	}
 
 	private void Shooting(Vector2 mousePos){
-		if (Input.GetMouseButton(0)){
-			if (mousePos.y > scaffoldsYPos + 0.5f){
-				foreach (Cannon cannon in cannons) {
-					cannon.TryShootAt(mousePos);
+
+		if (Time.time >= buildingCtrl.nextAllowedShotTime){
+			foreach (Turret turret in buildingCtrl.turrets) {
+				//Has ammo for turret?
+				if (turretAmmo[turret.stats.type] > 0){
+
+					bool turretShot = turret.TryShootAt(mousePos);
+					if (turretShot){ 
+						buildingCtrl.nextAllowedShotTime = Time.time + buildingCtrl.shotTimerOffset;
+						turretAmmo[turret.stats.type] -= 1;
+						UpdateInfoPanel();
+						break;
+					}
 				}
 			}
 		}
+
 	}
 
-	private void BuildingClicking(Vector2 mousePos){
-		if (Input.GetMouseButtonDown(0) && mousePos.y < scaffoldsYPos + 0.5f){
-			RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
-			if (hit.collider != null){
-				//Show scaffold-selector
-				if (buildingSelector == null) buildingSelector = Instantiate(buildingSelectorPrefab);
-				buildingSelector.SetActive(true);
-				buildingSelector.transform.position = hit.collider.transform.position;
-
-
-				//Set values
-				selectedBuilding = hit.collider.gameObject;
-				state = GameState.INGAME_MENU;
-			}
-		}
-	}
 
 	
 
 	private void Init(){
+
+		money = 0;
+		turretAmmo[ProjectileType.EXPLODING] = 10;
+
+
 		//Set values
-		cannons = new List<Cannon>();
-		state = GameState.GAME;
-
-		//Spawn scaffolding
-		Vector2 spawnPos = new Vector2(0, scaffoldsYPos);
-		for (int i = 0; i < scaffoldsAmount; i++) {
-
-					//startX  width   offset
-			spawnPos.x = -4f + 0.5f + 1f * i;
-
-			GameObject scaffoldT = (GameObject) Instantiate(scaffoldingPrefab, spawnPos, Quaternion.identity);
-
-		}
-
-		//Spawn mid turret
-		ConstructTurret(cannonMidPos.position);
+		UpdateInfoPanel();
+	
 	}
 
+	public bool CanAffordBuilding(BuildingType type){
+		if (money >= buildingLib.GetBuildingDefinition(type).buildPrice) return true;
+		return false;
+	}
 
-	private void ConstructTurret(Vector2 pos){
-//		if (selectedBuilding == null) throw new UnassignedReferenceException("selectedScaffold == null");
+	public void PlacedBuilding(BuildingType type){
+		//Update values
+		intmsnState = IntermissionState.NORMAL;
 
-		//Hide selector
-//		buildingSelector.gameObject.SetActive(false);
+		//pay
+		money -= buildingLib.GetBuildingDefinition(type).buildPrice;
 
-		//Create turret
-		GameObject cannonT = (GameObject) Instantiate(turretPrefab, pos, Quaternion.identity);
-		Cannon cannon = cannonT.GetComponent<Cannon>();
-		cannon.Init(CannonStats.DefaultCannon);
+		//UI
+		UpdateInfoPanel();
+	}
 
-		//Destroy scaffold
-//		GameObject.Destroy(selectedBuilding.gameObject);
-//		selectedBuilding = null;
+	private void UpdateInfoPanel(){
+		//UI
+		uiCtrl.UpdateInfoPanel(money, score, powerUse, powerMax, turretAmmo[ProjectileType.EXPLODING], turretAmmo[ProjectileType.NORMAL]);
+	}
 
-		//Set values
-		cannons.Add(cannon);
-		state = GameState.GAME;
+	public void BuyBuilding(BuildingType type){
+
+		//Tell build contoller
+		buildingCtrl.PlacingBuilding(type);
+
+		//Update values
+		intmsnState = IntermissionState.PLACING_BUILDING;
+
+
 	}
 
 	private void StartWave(){
 		waveCtrl.StartCurrentWave();
 		uiCtrl.ShowWaveIntro(currWave);
+		buildingCtrl.InitWave();
+		SwitchState(GameState.GAME);
+
+
 	}
 
-	public void WaveDestroyed(){
+	public void TestFunc(){
+		print("TestFunc!!!");
+		uiCtrl.ShowWaveIntro(100);
 
 	}
 
+
+	public void WaveCompleted(){
+		uiCtrl.ShowWaveOutro(currWave);
+
+//		Timer.CallDelayed(GoToIntermission, endWaveDuration);
+
+		SwitchState(GameState.WAVE_ENDED);
+	}
+
+
+	public void GoToIntermission(){
+		SwitchState(GameState.INTERMISSION);
+		buildingCtrl.IntermissionStarted();
+		
+		//DEBUG
+		money += waveCtrl.GetAmountMoneyForWave(currWave);
+		UpdateInfoPanel();
+		
+		UpdateAmmoAndPower();
+	}
 
 	public void MakeExplosionAt(Vector2 pos){
 		GameObject explosionGO = (GameObject) Instantiate(explosionPrefab, pos, Quaternion.identity);
@@ -168,6 +223,36 @@ public class GameController : MonoBehaviour {
 
 	}
 
+	public void GoToNextWave(){
+		currWave++;
+		StartWave();
+	}
+
+
+	public void UpdateAmmoAndPower(){
+//		Dictionary<TurretType, int> ammo = new Dictionary<TurretType, int>();
+
+		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
+			turretAmmo[(ProjectileType) i] = 0;
+		}
+		powerUse = 0;
+		powerMax = 0;
+		foreach (Building building in buildingCtrl.buildings) {
+			BuildingDefinition bd = buildingLib.GetBuildingDefinition(building.stats.type);
+			if (building.stats.type == BuildingType.TURRET_ROCKET || building.stats.type == BuildingType.TURRET_MINIGUN){
+				Turret turret = building.GetComponent<Turret>();
+				turretAmmo[turret.stats.type] += turret.stats.ammoMax;
+			}
+
+			if (bd.powerUse > 0){
+				powerMax += bd.powerUse;
+			}else{
+				powerUse += -bd.powerUse;
+			}
+		}
+
+		UpdateInfoPanel();
+	}
 
 	public bool IsOutsideBounds(Vector2 pos, float size = 0f){
 		if (pos.x - size > width / 2f || pos.x + size < -width / 2f ||
@@ -179,19 +264,39 @@ public class GameController : MonoBehaviour {
 	}
 
 
-	public float GetEnemySpawnPosY(){
-		return enemySpawnYPos;
+	private void SwitchState(GameState state){
+		this.state = state;
+
+		switch (state) {
+		case GameState.GAME:
+
+			break;
+		case GameState.INTERMISSION:
+			intmsnState = IntermissionState.NORMAL;
+			break;
+		default:
+			break;
+		}
+
+		uiCtrl.SwitchState(state);
 	}
 
-	public float GetEnemyGoalPosY(){
-		return enemyGoalYPos;
-	}
+
+
+	//COROUTINES
+//	private IEnumerator EndGame
 }
 
 
 public enum GameState{
 	MENU = 0,
 	GAME = 1,
-	INGAME_MENU = 2
+	WAVE_ENDED = 2,
+	INTERMISSION = 3
 
+}
+
+public enum IntermissionState{
+	NORMAL = 0,
+	PLACING_BUILDING = 1
 }

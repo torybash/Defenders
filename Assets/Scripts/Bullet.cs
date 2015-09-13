@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Bullet : MonoBehaviour {
 
-	BulletStats stats;
+	ProjectileType type;
 
 	Vector2 goalPos;
 
@@ -24,7 +24,7 @@ public class Bullet : MonoBehaviour {
 		}
 
 		//Exploding
-		if (stats.bulletType == BulletType.EXPLODING){
+		if (type == ProjectileType.EXPLODING){
 			Vector2 dir = GetComponent<Rigidbody2D>().velocity.normalized;
 
 			//Is postion further than goal pos?
@@ -40,13 +40,13 @@ public class Bullet : MonoBehaviour {
 	}
 
 
-	public void Init(Vector2 goalPos, BulletStats stats){
+	public void Init(Vector2 goalPos, ProjectileType type, float speed){
 		this.goalPos = goalPos;
-		this.stats = stats;
+		this.type = type;
 
 		//Set velocity
 		Vector2 dir = (goalPos - (Vector2)transform.position).normalized;
-		Vector2 vel = dir * stats.speed;
+		Vector2 vel = dir * speed;
 		rb.AddForce(vel, ForceMode2D.Impulse);
 
 		//Set rotation
@@ -57,7 +57,7 @@ public class Bullet : MonoBehaviour {
 
 	private void BulletHitTarget(){
 
-		if (stats.bulletType == BulletType.EXPLODING){
+		if (type == ProjectileType.EXPLODING){
 			gameCtrl.MakeExplosionAt(transform.position);
 		}
 
@@ -75,12 +75,3 @@ public class Bullet : MonoBehaviour {
 	}
 }
 
-public class BulletStats{
-	public BulletType bulletType;
-	public float speed;
-}
-
-public enum BulletType{
-	NORMAL = 0,
-	EXPLODING = 1
-}
