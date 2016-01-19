@@ -42,7 +42,9 @@ public class UIController : MonoBehaviour {
 	public void Init(){
 		//Initialize build panel
 	
-		foreach (BuildingDefinition bd in gameCtrl.buildingLib.GetAllBuildingDefs()) {
+		foreach (BuildingType bt in Enum.GetValues(typeof(BuildingType))) {
+
+			BuildingDefinition bd = BuildingLibrary.I.GetDefinition(bt);
 			GameObject buildPanelElement = Instantiate(buildPanelElementPrefab);
 			buildPanelElement.transform.SetParent(layoutBuildPanel.transform);
 			buildPanelElement.transform.localScale = Vector3.one;
@@ -69,15 +71,17 @@ public class UIController : MonoBehaviour {
 
 		WaveCompleteData data = new WaveCompleteData();
 		data.ammoLeft = new Dictionary<ProjectileType, int>();
-		foreach (var item in gameCtrl.turretAmmo) data.ammoLeft.Add(item.Key, item.Value);
+//		foreach (var item in gameCtrl.turretAmmo) data.ammoLeft.Add(item.Key, item.Value);
 
 		data.buildingsLeft = new Dictionary<BuildingType, int>();
-		for (int i = 0; i < (int)BuildingType.AMOUNT; i++) {
+		for (int i = 0; i < System.Enum.GetValues(typeof(BuildingType)).Length; i++) {
 			data.buildingsLeft.Add((BuildingType) i, 0);
 		}
 		foreach (Building item in gameCtrl.buildingCtrl.buildings) {
-			data.buildingsLeft[item.stats.type] += 1;
 
+			Debug.Log("bldng: "+ item + ", item.stats.type: " + item.stats.type);
+
+			data.buildingsLeft[item.stats.type] += 1;
 		}
 		data.moneyBonus = gameCtrl.waveCtrl.GetAmountMoneyForWave(gameCtrl.currWave);
 

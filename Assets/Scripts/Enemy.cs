@@ -47,6 +47,13 @@ public class Enemy : MonoBehaviour {
 
 	public void Init(EnemyType type){
 		UpdateGoalPos();
+
+		//TODO MAKE LIBRAY INSTEAD!!!
+		if (type == EnemyType.WALKER){
+			speed = 5f;
+		}else{
+			speed = 2f;
+		}
 	}
 
 
@@ -58,8 +65,8 @@ public class Enemy : MonoBehaviour {
 		GameObject.Destroy(gameObject);
 	}
 
-	void OnTriggerEnter2D(Collider2D coll){
-		print ("OnTriggerEnter2D - enemy collided with: " + coll);
+	void OnTriggerStay2D(Collider2D coll){
+//		print ("OnTriggerEnter2D - enemy collided with: " + coll);
 
 		if (coll.GetComponent<Building>() != null){
 			Building building = coll.GetComponent<Building>();

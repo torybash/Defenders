@@ -10,6 +10,7 @@ public class SpriteLibraryEditor : Editor {
 //	SpriteLibrary sprLib;
 	SerializedObject getTarget;
 	SerializedProperty buildingSpritesList;
+	SerializedProperty enemySpritesList;
 //
 
 	int testInt;
@@ -18,6 +19,7 @@ public class SpriteLibraryEditor : Editor {
 //		sprLib = (SpriteLibrary)target;
 //		getTarget = new SerializedObject(sprLib);
 		buildingSpritesList = serializedObject.FindProperty("buildingSprites"); // Find the List in our script and create a refrence of it
+		enemySpritesList = serializedObject.FindProperty("enemySprites"); // Find the List in our script and create a refrence of it
 ////		buildingSpritesList = getTarget.FindProperty("buildingSprites"); // Find the List in our script and create a refrence of it
 	}
 
@@ -33,6 +35,7 @@ public class SpriteLibraryEditor : Editor {
 //		EditorGUILayout.PropertyField(tps, true);
 
 
+		EditorGUILayout.LabelField("Buildings");
 		for(int i = 0; i < buildingSpritesList.arraySize; i++){
 
 
@@ -64,6 +67,26 @@ public class SpriteLibraryEditor : Editor {
 
 		if (GUILayout.Button ("Add")){
 			buildingSpritesList.InsertArrayElementAtIndex(buildingSpritesList.arraySize);
+		}
+
+		EditorGUILayout.LabelField("Enemies");
+		for(int i = 0; i < enemySpritesList.arraySize; i++){
+
+
+
+			SerializedProperty bldProp = enemySpritesList.GetArrayElementAtIndex(i);
+			//			buildingSprite.
+			for (int j = 0; j < typeof(EnemySprite).GetFields().Length; j++) {
+				System.Reflection.FieldInfo field = typeof(EnemySprite).GetFields()[j];
+
+				SerializedProperty serProp = bldProp.FindPropertyRelative(field.Name);
+
+				EditorGUILayout.PropertyField( serProp );
+			}
+		}
+
+		if (GUILayout.Button ("Add")){
+			enemySpritesList.InsertArrayElementAtIndex(enemySpritesList.arraySize);
 		}
 
 		if(EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

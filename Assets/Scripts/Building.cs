@@ -8,7 +8,7 @@ public class Building : MonoBehaviour {
 	public BuildingStats stats;
 
 
-//	public 
+	public BuildingType type;
 
 	BuildingController buildingCtrl;
 
@@ -20,27 +20,27 @@ public class Building : MonoBehaviour {
 	}
 
 
-	public void Init(BuildingController buildingCtrl, BuildingDefinition bd){
+	public void Init(BuildingController buildingCtrl, BuildingType type, BuildingDefinition bd){
 		this.buildingCtrl = buildingCtrl;
-//		this.type = type;
-
-//		stats = 
+		stats = new BuildingStats(type, bd);
 	}
 }
 
 public class BuildingStats{
 
 	public BuildingType type;
-	public string name;
-	public int powerUse;
-	public float damage;
-	public float speed;
-	public int sellValue;
+	public BuildingDefinition bd;
+
+	public int hpLeft;
 	public List<BuildingUpgrade> upgrades;
 
 
-	public BuildingStats(BuildingDefinition bd){
+	public BuildingStats(BuildingType type, BuildingDefinition bd){
+		this.bd = bd;
+		this.type = type;
 
+		hpLeft = bd.hpMax;
+//		upgrades = TODO
 	}
 }
 

@@ -10,9 +10,6 @@ public class GameController : MonoBehaviour {
 	public UIController uiCtrl;
 	public BuildingController buildingCtrl;
 
-	public BuildingLibrary buildingLib;
-	public SpriteLibrary spriteLib;
-
 
 	//Object references
 	[Header("References")]
@@ -51,21 +48,27 @@ public class GameController : MonoBehaviour {
 	public int powerUse;
 	public int powerMax;
 
-	public Dictionary<ProjectileType, int> turretAmmo = new Dictionary<ProjectileType, int>();
+//	public Dictionary<ProjectileType, int> turretAmmo = new Dictionary<ProjectileType, int>();
 
+
+	public static GameController I;
 
 	void Awake(){
+		if (I == null){
+			I = this;
+		}else{
+			Destroy(gameObject);
+			return;
+		}
+
 		camCtrl = GetComponent<CameraController>();
 		waveCtrl = GetComponent<WaveController>();
 		uiCtrl = GetComponent<UIController>();
 		buildingCtrl = GetComponent<BuildingController>();
 
-		buildingLib = GameObject.FindGameObjectWithTag("GameLibrary").GetComponent<BuildingLibrary>();
-		spriteLib = GameObject.FindGameObjectWithTag("GameLibrary").GetComponent<SpriteLibrary>();
-
-		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
-			turretAmmo.Add((ProjectileType) i, 0);
-		}
+//		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
+//			turretAmmo.Add((ProjectileType) i, 0);
+//		}
 	}
 
 
@@ -120,16 +123,16 @@ public class GameController : MonoBehaviour {
 		if (Time.time >= buildingCtrl.nextAllowedShotTime){
 			foreach (Turret turret in buildingCtrl.turrets) {
 				//Has ammo for turret?
-				if (turretAmmo[turret.stats.type] > 0){
+//				if (turretAmmo[turret.Stats.def.type] > 0){
 
 					bool turretShot = turret.TryShootAt(mousePos);
 					if (turretShot){ 
 						buildingCtrl.nextAllowedShotTime = Time.time + buildingCtrl.shotTimerOffset;
-						turretAmmo[turret.stats.type] -= 1;
+//						turretAmmo[turret.Stats.def.type] -= 1;
 						UpdateInfoPanel();
 						break;
 					}
-				}
+//				}
 			}
 		}
 
@@ -141,7 +144,7 @@ public class GameController : MonoBehaviour {
 	private void Init(){
 
 		money = 0;
-		turretAmmo[ProjectileType.EXPLODING] = 10;
+//		turretAmmo[ProjectileType.EXPLODING] = 10;
 
 
 		//Set values
@@ -150,7 +153,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	public bool CanAffordBuilding(BuildingType type){
-		if (money >= buildingLib.GetBuildingDefinition(type).buildPrice) return true;
+		if (money >= BuildingLibrary.I.GetDefinition(type).buildPrice) return true;
 		return false;
 	}
 
@@ -159,7 +162,7 @@ public class GameController : MonoBehaviour {
 		intmsnState = IntermissionState.NORMAL;
 
 		//pay
-		money -= buildingLib.GetBuildingDefinition(type).buildPrice;
+		money -= BuildingLibrary.I.GetDefinition(type).buildPrice;
 
 		//UI
 		UpdateInfoPanel();
@@ -167,7 +170,8 @@ public class GameController : MonoBehaviour {
 
 	private void UpdateInfoPanel(){
 		//UI
-		uiCtrl.UpdateInfoPanel(money, score, powerUse, powerMax, turretAmmo[ProjectileType.EXPLODING], turretAmmo[ProjectileType.NORMAL]);
+//		uiCtrl.UpdateInfoPanel(money, score, powerUse, powerMax, turretAmmo[ProjectileType.EXPLODING], turretAmmo[ProjectileType.NORMAL]);
+		uiCtrl.UpdateInfoPanel(money, score, powerUse, powerMax, 0, 0);
 	}
 
 	public void BuyBuilding(BuildingType type){
@@ -232,17 +236,19 @@ public class GameController : MonoBehaviour {
 	public void UpdateAmmoAndPower(){
 //		Dictionary<TurretType, int> ammo = new Dictionary<TurretType, int>();
 
-		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
-			turretAmmo[(ProjectileType) i] = 0;
-		}
+
+//		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
+//			turretAmmo[(ProjectileType) i] = 0;
+//		}
 		powerUse = 0;
 		powerMax = 0;
 		foreach (Building building in buildingCtrl.buildings) {
-			BuildingDefinition bd = buildingLib.GetBuildingDefinition(building.stats.type);
-			if (building.stats.type == BuildingType.TURRET_ROCKET || building.stats.type == BuildingType.TURRET_MINIGUN){
-				Turret turret = building.GetComponent<Turret>();
-				turretAmmo[turret.stats.type] += turret.stats.ammoMax;
-			}
+			if (building == null || building.stats == null) continue;
+			BuildingDefinition bd = BuildingLibrary.I.GetDefinition(building.stats.type);
+//			if (building.stats.type == BuildingType.TURRET_ROCKET || building.stats.type == BuildingType.TURRET_MINIGUN){
+//				Turret turret = building.GetComponent<Turret>();
+//				turretAmmo[turret.Stats.def.type] += turret.Stats.def.ammoMax;
+//			}
 
 			if (bd.powerUse > 0){
 				powerMax += bd.powerUse;

@@ -10,8 +10,16 @@ public class SpriteLibrary : MonoBehaviour {
 	[SerializeField] List<EnemySprite> enemySprites;
 	Dictionary<EnemyType, Sprite> enemySpritesDict = new Dictionary<EnemyType, Sprite>();
 
+	public static SpriteLibrary I;
 
 	void Awake(){
+		if (I == null){
+			I = this;
+			DontDestroyOnLoad(gameObject);
+		}else{
+			Destroy(gameObject);
+			return;
+		}
 		foreach (BuildingSprite item in buildingSprites) {
 			buildingSpritesDict.Add(item.type, item);
 		}
@@ -47,3 +55,4 @@ public class EnemySprite{
 	public EnemyType type;
 	public Sprite sprite;
 }
+

@@ -92,26 +92,3 @@ public class WaveController : MonoBehaviour {
 	}
 }
 
-[System.Serializable]
-public class WaveDefinition{
-	public List<WavePart> waveParts;
-
-}
-
-[System.Serializable]
-public class WavePart{
-	public float time;
-	public List<WaveEnemy> enemies;
-}
-
-[System.Serializable]
-public class WaveEnemy{
-	public EnemyType type;
-	public float startX;
-	public float goalX;
-}
-
-[System.Serializable]
-public enum EnemyType{
-	NORMAL = 0
-}

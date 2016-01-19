@@ -77,7 +77,7 @@ public class BuildingController : MonoBehaviour {
 		turrets = new List<Turret>();
 
 		//Spawn btm center turret
-		BuildBuilding(4, 0, BuildingType.TURRET_ROCKET);
+		BuildBuilding(4, 0, BuildingType.TURRET_MINIGUN);
 		BuildBuilding(3, 0, BuildingType.POWER_STATION);
 		BuildBuilding(5, 0, BuildingType.WEAPON_FACTORY);
 	}
@@ -85,7 +85,7 @@ public class BuildingController : MonoBehaviour {
 
 	public void InitWave(){
 		//TODO only add offset if weapons are the same
-		float cooldown = turrets[0].stats.cooldownDuration;
+		float cooldown = turrets[0].Stats.def.cooldownDuration;
 		float offset = cooldown / (float)turrets.Count;
 		int c = 0;
 
@@ -178,7 +178,7 @@ public class BuildingController : MonoBehaviour {
 					GameObject ghostGO = buildingGhosts[x, y];
 					ghostGO.SetActive(true);
 
-					ghostGO.GetComponent<SpriteRenderer>().sprite = gameCtrl.spriteLib.GetBuildingSprite(type);
+					ghostGO.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetBuildingSprite(type);
 				}
 			}
 		}
@@ -198,29 +198,30 @@ public class BuildingController : MonoBehaviour {
 		float posY = gameCtrl.camCtrl.GetBottomY() + gameCtrl.buildingFieldYAboveBottom - 1f + y * 1f;
 		Vector2 pos = new Vector2(posX, posY);
 
+		//Get building def
+		BuildingDefinition bd = BuildingLibrary.I.GetDefinition(type);
+
 		//Hide selector
 		if (buildingSelector != null) buildingSelector.gameObject.SetActive(false);
 		
 		//Create building
 		GameObject buildingGO = (GameObject) Instantiate(buildingPrefab, pos, Quaternion.identity);
+		Building building = buildingGO.GetComponent<Building>();
+		building.Init(this, type, bd);
 
 		//Initialise cannon
-		if (type == BuildingType.TURRET_ROCKET || type == BuildingType.TURRET_MINIGUN){
-			Turret cannon = buildingGO.GetComponent<Turret>();
-			cannon.Init(TurretStats.DefaultTurret);
-			turrets.Add(cannon);
+		if (bd.isTurret){
+			Turret turret = buildingGO.GetComponent<Turret>();
+			turret.Init(bd.turretDef);
+			turrets.Add(turret);
 		}
 
 		//Set sprite
-		buildingGO.GetComponent<SpriteRenderer>().sprite = gameCtrl.spriteLib.GetBuildingSprite(type);
+		buildingGO.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetBuildingSprite(type);
 
 		//Destroy scaffold
 //		if (selectedBuilding != null) GameObject.Destroy(selectedBuilding.gameObject);
 //		selectedBuilding = null;
-
-		//Init building
-		Building building = buildingGO.GetComponent<Building>();
-		building.Init(this, gameCtrl.buildingLib.GetBuildingDefinition(type));
 
 		//Set values
 		buildingSlots[x, y] = building;
@@ -256,10 +257,11 @@ public class BuildingController : MonoBehaviour {
 	private void SetBuildingState(Building building, bool destroyed){
 		building.GetComponent<Collider2D>().enabled = !destroyed;
 		building.isDestroyed = destroyed;
+		Debug.Log("building.GetComponent<SpriteRenderer>(): " + building.GetComponent<SpriteRenderer>());
 		if (destroyed){
-			building.GetComponent<SpriteRenderer>().sprite = gameCtrl.spriteLib.GetDestroyedBuildingSprite(building.stats.type);
+			building.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetDestroyedBuildingSprite(building.stats.type);
 		}else{
-			building.GetComponent<SpriteRenderer>().sprite = gameCtrl.spriteLib.GetBuildingSprite(building.stats.type);
+			building.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetBuildingSprite(building.stats.type);
 		}
 
 	}
@@ -271,6 +273,5 @@ public enum BuildingType{
 	TURRET_MINIGUN = 1,
 	POWER_STATION = 2,
 	WEAPON_FACTORY = 3,
-	MONEY_FACTORY = 4,
-	AMOUNT = 5
+	MONEY_FACTORY = 4
 }

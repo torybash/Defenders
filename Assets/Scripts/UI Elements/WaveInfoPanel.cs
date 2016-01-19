@@ -70,7 +70,7 @@ public class WaveInfoPanel : MonoBehaviour {
 			if (Time.time <= nextCountTime) return;
 
 			//Has checked all types?
-			if (typeIncr >= (int) BuildingType.AMOUNT){
+			if (typeIncr >= (int) System.Enum.GetValues(typeof(BuildingType)).Length){
 				state = State.OUTRO_COUNTING_AMMO_SCORE;
 				typeIncr = 0;
 				objIncr = 0;
@@ -104,33 +104,37 @@ public class WaveInfoPanel : MonoBehaviour {
 		case State.OUTRO_COUNTING_AMMO_SCORE:
 			
 			if (Time.time <= nextCountTime) return;
-			
+
+			state = State.OUTRO_BONUS_MONEY;
+			stateSwitchTime = Time.time + outroAfterCountWaitDuration;
+
+
 			//Has checked all types?
-			if (typeIncr >= (int) ProjectileType.AMOUNT){
-				state = State.OUTRO_BONUS_MONEY;
-				stateSwitchTime = Time.time + outroAfterCountWaitDuration;
-				break;
-			}
+//			if (typeIncr >= (int) ProjectileType.AMOUNT){
+//				state = State.OUTRO_BONUS_MONEY;
+//				stateSwitchTime = Time.time + outroAfterCountWaitDuration;
+//				break;
+//			}
 			
 			//any buildings left of typeIncr?
-			ProjectileType turretType = (ProjectileType) typeIncr;
-			if (currData.ammoLeft[turretType] > objIncr){
-				
-				//Update UI
-				objCount++;
-				totScore += 10; //TODO
-				
-				nextCountTime = Time.time + outroCountAmmoSpeed;
-				objIncr++;
-			}else{
-				typeIncr++;
-				objIncr = 0;
-			}
+//			ProjectileType turretType = (ProjectileType) typeIncr;
+//			if (currData.ammoLeft[turretType] > objIncr){
+//				
+//				//Update UI
+//				objCount++;
+//				totScore += 10; //TODO
+//				
+//				nextCountTime = Time.time + outroCountAmmoSpeed;
+//				objIncr++;
+//			}else{
+//				typeIncr++;
+//				objIncr = 0;
+//			}
 			
 			//			if (currData.buildingsLeft[
 			
 			
-			textAmmoScore.text = "" + objCount + " ammo = " + totScore;
+//			textAmmoScore.text = "" + objCount + " ammo = " + totScore;
 			
 			break;
 		case State.OUTRO_BONUS_MONEY:
