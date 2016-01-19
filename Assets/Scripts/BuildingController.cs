@@ -91,7 +91,7 @@ public class BuildingController : MonoBehaviour {
 
 		shotTimerOffset = offset;
 
-		print("shotTimerOffset: " + shotTimerOffset);
+//		print("shotTimerOffset: " + shotTimerOffset);
 //		public float shotTimerOffset;
 
 //		foreach (Turret item in turrets) {
@@ -257,7 +257,7 @@ public class BuildingController : MonoBehaviour {
 	private void SetBuildingState(Building building, bool destroyed){
 		building.GetComponent<Collider2D>().enabled = !destroyed;
 		building.isDestroyed = destroyed;
-		Debug.Log("building.GetComponent<SpriteRenderer>(): " + building.GetComponent<SpriteRenderer>());
+//		Debug.Log("building.GetComponent<SpriteRenderer>(): " + building.GetComponent<SpriteRenderer>());
 		if (destroyed){
 			building.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetDestroyedBuildingSprite(building.stats.type);
 		}else{

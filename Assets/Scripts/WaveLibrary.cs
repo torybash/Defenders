@@ -16,12 +16,24 @@ public class WaveDefinition{
 [System.Serializable]
 public class WavePart{
 	public float time;
-	public List<WaveEnemy> enemies;
+	public float startX;
+	public EnemyType type;
+	public int count;
+	public float interval;
+
 }
 
-[System.Serializable]
-public class WaveEnemy{
-	public EnemyType type;
-	public float startX;
-	public float goalX;
+public class WavePartComparer : IComparer
+{
+	public int Compare(object x, object y)
+	{
+		return ((Transform) x).name.CompareTo(((Transform) y).name);
+	}
 }
+
+//[System.Serializable]
+//public class WaveEnemy{
+//	public EnemyType type;
+//	public float startX;
+//	public float goalX;
+//}

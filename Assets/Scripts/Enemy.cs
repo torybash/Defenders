@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Holoville.HOTween;
 
 public class Enemy : MonoBehaviour {
 
-
-	float speed = 5;
 
 	Vector2 vel = Vector2.zero;
 
@@ -13,6 +12,12 @@ public class Enemy : MonoBehaviour {
 	Building currTarget;
 
 	Rigidbody2D rb;
+
+	Vector2 goalPos;
+
+	public EnemyStats stats;
+
+	Tweener currGotHitTween;
 
 	void Awake(){
 		gameCtrl = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
@@ -30,40 +35,58 @@ public class Enemy : MonoBehaviour {
 
 	private void UpdateGoalPos(){
 		currTarget = gameCtrl.buildingCtrl.GetClosestBuilding(transform.position);
-		Vector2 goalPos = Vector2.zero;
+		goalPos = Vector2.zero;
 		if (currTarget == null){
 			goalPos = transform.position;
 		}else{
 			goalPos = currTarget.transform.position;
 		}
 		
+	}
 
-
+	void FixedUpdate(){ 
+//		Debug.Log("stats.def.speed: " +stats.def.speed);
 		GetComponent<Rigidbody2D>().AddForce(-rb.velocity, ForceMode2D.Impulse); //stop velocity
-		vel = (goalPos - (Vector2)transform.position).normalized * speed;
+		vel = (goalPos - (Vector2)transform.position).normalized * stats.def.speed;
 		GetComponent<Rigidbody2D>().AddForce(vel, ForceMode2D.Impulse);
 	}
 
 
-	public void Init(EnemyType type){
+	public void Init(EnemyDefinition def){
 		UpdateGoalPos();
 
+		stats.def = def;
+		stats.currHp = def.maxHp;
+
 		//TODO MAKE LIBRAY INSTEAD!!!
-		if (type == EnemyType.WALKER){
-			speed = 5f;
-		}else{
-			speed = 2f;
-		}
+		
 	}
 
 
 	public void GotHit(){
 		//Debug
 
-		gameCtrl.waveCtrl.EnemyKilled(this);
+		stats.currHp -= 1;
 
-		GameObject.Destroy(gameObject);
+		if (stats.currHp <= 0){ //Die
+			gameCtrl.waveCtrl.EnemyKilled(this);
+
+			GameObject.Destroy(gameObject);
+		}else{ //Hit effect
+			Color hitColor = new Color(1f, 0.5f, 0.5f, 1);
+			if (currGotHitTween != null) currGotHitTween.Complete();
+			currGotHitTween = HOTween.To(GetComponent<SpriteRenderer>(), 0.1f, new TweenParms().Prop("color", hitColor).Ease(EaseType.EaseInOutCirc).Loops(2, LoopType.Yoyo));
+
+//			if (currGotHitCR != null) StopCoroutine(currGotHitCR);
+//			currGotHitCR = StartCoroutine(GotHitEffect());
+		}
 	}
+
+//	private IEnumerator GotHitEffect(){
+//		
+//		yield return new WaitForSeconds(2f);
+//	}
+
 
 	void OnTriggerStay2D(Collider2D coll){
 //		print ("OnTriggerEnter2D - enemy collided with: " + coll);
@@ -80,4 +103,11 @@ public class Enemy : MonoBehaviour {
 			GotHit();
 		}
 	}
+}
+
+[System.Serializable]
+public class EnemyStats{
+	public EnemyDefinition def;
+	public int currHp;
+	
 }

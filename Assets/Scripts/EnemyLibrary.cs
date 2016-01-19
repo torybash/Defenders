@@ -14,7 +14,9 @@ public class EnemyDefinition{
 	public EnemyType type;
 
 	public float speed;
-	public int hp;
+	public int maxHp;
+	public int minGold;
+	public int maxGold;
 
 	public override string ToString ()
 	{

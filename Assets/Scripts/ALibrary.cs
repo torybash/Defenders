@@ -31,7 +31,9 @@ public abstract class ALibrary<T, T2> : MonoBehaviour {
 		}
 	}
 
-	
+	public List<T> GetDefinitionList(){
+		return definitions;
+	}
 
 //	public void AddListElement(T def, T2 type){
 //		dict.Add(type, def);

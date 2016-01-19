@@ -41,7 +41,7 @@ public class GameController : MonoBehaviour {
 
 
 
-	public int currWave;
+	public int currWaveIdx;
 	public int score;
 	public int highscore;
 	public int money;
@@ -186,8 +186,9 @@ public class GameController : MonoBehaviour {
 	}
 
 	private void StartWave(){
+		Debug.Log("StartWave " + currWaveIdx);
 		waveCtrl.StartCurrentWave();
-		uiCtrl.ShowWaveIntro(currWave);
+		uiCtrl.ShowWaveIntro(currWaveIdx);
 		buildingCtrl.InitWave();
 		SwitchState(GameState.GAME);
 
@@ -202,7 +203,7 @@ public class GameController : MonoBehaviour {
 
 
 	public void WaveCompleted(){
-		uiCtrl.ShowWaveOutro(currWave);
+		uiCtrl.ShowWaveOutro(currWaveIdx);
 
 //		Timer.CallDelayed(GoToIntermission, endWaveDuration);
 
@@ -215,7 +216,7 @@ public class GameController : MonoBehaviour {
 		buildingCtrl.IntermissionStarted();
 		
 		//DEBUG
-		money += waveCtrl.GetAmountMoneyForWave(currWave);
+		money += waveCtrl.GetAmountMoneyForWave(currWaveIdx);
 		UpdateInfoPanel();
 		
 		UpdateAmmoAndPower();
@@ -228,7 +229,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	public void GoToNextWave(){
-		currWave++;
+		currWaveIdx++;
 		StartWave();
 	}
 

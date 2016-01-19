@@ -79,11 +79,11 @@ public class UIController : MonoBehaviour {
 		}
 		foreach (Building item in gameCtrl.buildingCtrl.buildings) {
 
-			Debug.Log("bldng: "+ item + ", item.stats.type: " + item.stats.type);
+//			Debug.Log("bldng: "+ item + ", item.stats.type: " + item.stats.type);
 
 			data.buildingsLeft[item.stats.type] += 1;
 		}
-		data.moneyBonus = gameCtrl.waveCtrl.GetAmountMoneyForWave(gameCtrl.currWave);
+		data.moneyBonus = gameCtrl.waveCtrl.GetAmountMoneyForWave(gameCtrl.currWaveIdx);
 
 //		gameCtrl.turretAmmo
 //		data.ammoLeft = 

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 public class WaveController : MonoBehaviour {
 
-	[Header("Waves")]
-	[SerializeField] List<WaveDefinition> waves;
+//	[Header("Waves")]
+//	[SerializeField] List<WaveDefinition> waves;
 
 	[Header("Prefabs")]
 	[SerializeField] GameObject enemyPrefab;
@@ -32,7 +32,7 @@ public class WaveController : MonoBehaviour {
 	}
 
 	public void StartCurrentWave(){
-		currWave = waves[gameCtrl.currWave];
+		currWave = WaveLibrary.I.GetDefinition(gameCtrl.currWaveIdx);
 		waveStartTime = Time.time;
 		wavePartIncr = 0;
 
@@ -72,15 +72,28 @@ public class WaveController : MonoBehaviour {
 
 			//Is time for next wave part?
 			WavePart part = currWave.waveParts[wavePartIncr];
-			if (Time.time > waveStartTime + part.time){
-				foreach (WaveEnemy waveEnemy in part.enemies) {
-					GameObject enemyGO = (GameObject) Instantiate(enemyPrefab, new Vector2(waveEnemy.startX, gameCtrl.enemySpawnYPos), Quaternion.identity);
-					Enemy enemy = enemyGO.GetComponent<Enemy>();
-					enemy.Init(waveEnemy.type);
-					currWaveEnemies.Add(enemyGO.GetInstanceID(), enemy);
-				}
+			while (Time.time > waveStartTime + part.time){
+				Debug.Log("Spawning part at: " + (Time.time - waveStartTime));
+				StartCoroutine(SpawnWavePart(part));
 
 				wavePartIncr++;
+				if (wavePartIncr < currWave.waveParts.Count) part = currWave.waveParts[wavePartIncr];
+				else break;
+			}
+		}
+	}
+
+	private IEnumerator SpawnWavePart(WavePart part){
+		for (int i = 0; i < part.count; i++) {
+			//				foreach (WaveEnemy waveEnemy in part.enemies) {
+			GameObject enemyGO = (GameObject) Instantiate(enemyPrefab, new Vector2(part.startX, gameCtrl.enemySpawnYPos), Quaternion.identity);
+			Enemy enemy = enemyGO.GetComponent<Enemy>();
+
+			enemy.Init(EnemyLibrary.I.GetDefinition(part.type));
+			currWaveEnemies.Add(enemyGO.GetInstanceID(), enemy);
+
+			if (i < part.count - 1){ //if is not last part
+				yield return new WaitForSeconds(part.interval);
 			}
 		}
 	}

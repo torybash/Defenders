@@ -31,7 +31,7 @@ public class Turret : MonoBehaviour {
 		stats.def = def;
 		stats.currShotsOut = 0;
 
-		Debug.Log("initialized turret with TurretDefinition: "+  def);
+//		Debug.Log("initialized turret with TurretDefinition: "+  def);
 	}
 
 	public bool TryShootAt(Vector2 pos){

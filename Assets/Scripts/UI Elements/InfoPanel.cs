@@ -22,10 +22,10 @@ public class InfoPanel : MonoBehaviour {
 		Vector2 btmOfBuildingsWorldPos = new Vector2(0, btmOfScreenInWorldPos.y + GameController.I.buildingFieldYAboveBottom - (GameController.I.buildFieldHeight / 2f));
 		Vector2 btmOfBuildingsScreenPos = Camera.main.WorldToViewportPoint(btmOfBuildingsWorldPos);
 	
-		Debug.Log("btmOfScreenInScreenPos: " + btmOfScreenInScreenPos);
-		Debug.Log("btmOfScreenInWorldPos: "+ btmOfScreenInWorldPos);
-		Debug.Log("btmOfBuildingsWorldPos: "+ btmOfBuildingsWorldPos);
-		Debug.Log("btmOfBuildingsScreenPos: " + btmOfBuildingsScreenPos);
+//		Debug.Log("btmOfScreenInScreenPos: " + btmOfScreenInScreenPos);
+//		Debug.Log("btmOfScreenInWorldPos: "+ btmOfScreenInWorldPos);
+//		Debug.Log("btmOfBuildingsWorldPos: "+ btmOfBuildingsWorldPos);
+//		Debug.Log("btmOfBuildingsScreenPos: " + btmOfBuildingsScreenPos);
 
 		CanvasScaler cs = transform.parent.GetComponent<CanvasScaler>();
 		btmOfBuildingsScreenPos.x = 0;
