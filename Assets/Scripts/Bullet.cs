@@ -15,6 +15,7 @@ public class Bullet : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D>();
 
 		gameCtrl = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+	
 	}
 
 	void Update () {
@@ -44,6 +45,8 @@ public class Bullet : MonoBehaviour {
 		this.goalPos = goalPos;
 		this.type = type;
 
+		GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetProjectileSprite(type);
+
 		//Set velocity
 		Vector2 dir = (goalPos - (Vector2)transform.position).normalized;
 		Vector2 vel = dir * speed;
@@ -55,7 +58,7 @@ public class Bullet : MonoBehaviour {
 
 	}
 
-	private void BulletHitTarget(){
+	public void BulletHitTarget(){
 
 		if (type == ProjectileType.EXPLODING){
 			gameCtrl.MakeExplosionAt(transform.position);
@@ -65,13 +68,6 @@ public class Bullet : MonoBehaviour {
 	}
 
 
-	void OnTriggerEnter2D(Collider2D coll){
-//		print ("OnTriggerEnter2D - bullet collided with: " + coll);
 
-		if (coll.GetComponent<Enemy>() != null){
-			coll.GetComponent<Enemy>().GotHit();
-			BulletHitTarget();
-		}
-	}
 }
 

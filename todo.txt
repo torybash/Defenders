@@ -1,1 +1,11 @@
-*Make turret definitions in buildingLib
+*Optimize - needs test
+*Streamline building sprites
+*Make debris for different enemy types
+*Make crashing particle effect
+*Make audio effects
+*Animate bullets
+
+
+IF TIME
+*Animate turrets
+*Animate enemies

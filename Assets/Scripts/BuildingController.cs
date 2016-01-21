@@ -103,6 +103,7 @@ public class BuildingController : MonoBehaviour {
 		//Repair all buildings - TODO cost money or sumthin?
 		foreach (var item in buildings) {
 			SetBuildingState(item, false);
+			item.SetBuildingState(false);
 		}
 	}
 
@@ -207,7 +208,7 @@ public class BuildingController : MonoBehaviour {
 		//Create building
 		GameObject buildingGO = (GameObject) Instantiate(buildingPrefab, pos, Quaternion.identity);
 		Building building = buildingGO.GetComponent<Building>();
-		building.Init(this, type, bd);
+		building.Init(type, bd);
 
 		//Initialise cannon
 		if (bd.isTurret){
@@ -255,14 +256,7 @@ public class BuildingController : MonoBehaviour {
 	}
 
 	private void SetBuildingState(Building building, bool destroyed){
-		building.GetComponent<Collider2D>().enabled = !destroyed;
-		building.isDestroyed = destroyed;
-//		Debug.Log("building.GetComponent<SpriteRenderer>(): " + building.GetComponent<SpriteRenderer>());
-		if (destroyed){
-			building.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetDestroyedBuildingSprite(building.stats.type);
-		}else{
-			building.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetBuildingSprite(building.stats.type);
-		}
+
 
 	}
 }

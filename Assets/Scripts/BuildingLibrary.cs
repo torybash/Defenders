@@ -69,6 +69,5 @@ public class TurretDefinition{
 [System.Serializable]
 public enum ProjectileType{
 	NORMAL,
-	EXPLODING,
-	AMOUNT
+	EXPLODING
 }

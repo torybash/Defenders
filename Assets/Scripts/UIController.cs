@@ -81,7 +81,7 @@ public class UIController : MonoBehaviour {
 
 //			Debug.Log("bldng: "+ item + ", item.stats.type: " + item.stats.type);
 
-			data.buildingsLeft[item.stats.type] += 1;
+			data.buildingsLeft[item.stats.def.type] += 1;
 		}
 		data.moneyBonus = gameCtrl.waveCtrl.GetAmountMoneyForWave(gameCtrl.currWaveIdx);
 

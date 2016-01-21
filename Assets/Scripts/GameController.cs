@@ -9,7 +9,7 @@ public class GameController : MonoBehaviour {
 	public WaveController waveCtrl;
 	public UIController uiCtrl;
 	public BuildingController buildingCtrl;
-
+	public ParticleController partCtrl;
 
 	//Object references
 	[Header("References")]
@@ -51,6 +51,12 @@ public class GameController : MonoBehaviour {
 //	public Dictionary<ProjectileType, int> turretAmmo = new Dictionary<ProjectileType, int>();
 
 
+	[SerializeField] Transform groundPlane;
+
+	public Transform GroundPlane{
+		get{ return groundPlane;}
+	}
+
 	public static GameController I;
 
 	void Awake(){
@@ -65,6 +71,7 @@ public class GameController : MonoBehaviour {
 		waveCtrl = GetComponent<WaveController>();
 		uiCtrl = GetComponent<UIController>();
 		buildingCtrl = GetComponent<BuildingController>();
+		partCtrl = GetComponent<ParticleController>();
 
 //		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
 //			turretAmmo.Add((ProjectileType) i, 0);
@@ -77,6 +84,7 @@ public class GameController : MonoBehaviour {
 		waveCtrl.Init();
 		buildingCtrl.Init();
 		uiCtrl.Init();
+		partCtrl.Init();
 		Init();
 
 		//DEBUG
@@ -245,7 +253,7 @@ public class GameController : MonoBehaviour {
 		powerMax = 0;
 		foreach (Building building in buildingCtrl.buildings) {
 			if (building == null || building.stats == null) continue;
-			BuildingDefinition bd = BuildingLibrary.I.GetDefinition(building.stats.type);
+			BuildingDefinition bd = BuildingLibrary.I.GetDefinition(building.stats.def.type);
 //			if (building.stats.type == BuildingType.TURRET_ROCKET || building.stats.type == BuildingType.TURRET_MINIGUN){
 //				Turret turret = building.GetComponent<Turret>();
 //				turretAmmo[turret.Stats.def.type] += turret.Stats.def.ammoMax;

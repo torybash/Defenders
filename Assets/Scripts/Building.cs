@@ -10,34 +10,44 @@ public class Building : MonoBehaviour {
 
 	public BuildingType type;
 
-	BuildingController buildingCtrl;
 
 	public void GotHit(){
 
-		buildingCtrl.BuildingDestroyed(this);
+		GameController.I.buildingCtrl.BuildingDestroyed(this);
 
 
 	}
 
+	public void SetBuildingState(bool isDestroyed){
+		this.isDestroyed = isDestroyed;
+		GetComponent<Collider2D>().enabled = !isDestroyed;
 
-	public void Init(BuildingController buildingCtrl, BuildingType type, BuildingDefinition bd){
-		this.buildingCtrl = buildingCtrl;
-		stats = new BuildingStats(type, bd);
+		//		Debug.Log("building.GetComponent<SpriteRenderer>(): " + building.GetComponent<SpriteRenderer>());
+		if (isDestroyed){
+			GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetDestroyedBuildingSprite(stats.def.type);
+		
+		}else{
+			GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetBuildingSprite(stats.def.type);
+		}
+	}
+
+
+	public void Init(BuildingType type, BuildingDefinition bd){
+		stats = new BuildingStats(bd);
+
 	}
 }
 
 public class BuildingStats{
 
-	public BuildingType type;
-	public BuildingDefinition bd;
+	public BuildingDefinition def;
 
 	public int hpLeft;
 	public List<BuildingUpgrade> upgrades;
 
 
-	public BuildingStats(BuildingType type, BuildingDefinition bd){
-		this.bd = bd;
-		this.type = type;
+	public BuildingStats(BuildingDefinition bd){
+		this.def = bd;
 
 		hpLeft = bd.hpMax;
 //		upgrades = TODO

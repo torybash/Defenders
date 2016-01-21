@@ -10,6 +10,7 @@ public class SpriteLibraryEditor : Editor {
 //	SpriteLibrary sprLib;
 	SerializedObject getTarget;
 	SerializedProperty buildingSpritesList;
+	SerializedProperty projectileSpritesList;
 	SerializedProperty enemySpritesList;
 //
 
@@ -19,6 +20,7 @@ public class SpriteLibraryEditor : Editor {
 //		sprLib = (SpriteLibrary)target;
 //		getTarget = new SerializedObject(sprLib);
 		buildingSpritesList = serializedObject.FindProperty("buildingSprites"); // Find the List in our script and create a refrence of it
+		projectileSpritesList = serializedObject.FindProperty("projectileSprites"); // Find the List in our script and create a refrence of it
 		enemySpritesList = serializedObject.FindProperty("enemySprites"); // Find the List in our script and create a refrence of it
 ////		buildingSpritesList = getTarget.FindProperty("buildingSprites"); // Find the List in our script and create a refrence of it
 	}
@@ -43,24 +45,26 @@ public class SpriteLibraryEditor : Editor {
 			SerializedProperty buildingSprite = buildingSpritesList.GetArrayElementAtIndex(i);
 //			buildingSprite.
 
+
+
 			SerializedProperty buildingSpriteType = buildingSprite.FindPropertyRelative("type");
-			SerializedProperty buildingSpriteSprite = buildingSprite.FindPropertyRelative("sprite");
-			SerializedProperty buildingSpriteDestroyedSprite = buildingSprite.FindPropertyRelative("destroyedSprite");
+//			SerializedProperty buildingSpriteSprite = buildingSprite.FindPropertyRelative("sprite");
+//			SerializedProperty buildingSpriteDestroyedSprite = buildingSprite.FindPropertyRelative("destroyedSprite");
 
 			GUIStyle style = new GUIStyle();
 			style.fontStyle = FontStyle.Bold;
 			EditorGUILayout.LabelField("" + buildingSpriteType.enumDisplayNames[buildingSpriteType.enumValueIndex], style);
-
+			GUIHelpers.ClassField<BuildingSprite>(buildingSprite);
 
 //			buildingSprite
-			EditorGUILayout.PropertyField( buildingSpriteType );
+//			EditorGUILayout.PropertyField( buildingSpriteType );
 
 //			buildingSpriteType.enumValueIndex = (int)(BuildingType)EditorGUILayout.EnumPopup("Type:", (BuildingType)Enum.GetValues(typeof(BuildingType)).GetValue(buildingSpriteType.enumValueIndex));
 //			buildingSpriteType.enumValueIndex = (int)EditorGUILayout.EnumPopup("",(BuildingType) buildingSpriteType.enumValueIndex);
 
 //			buildingSpriteSprite.objectReferenceValue = 
-			EditorGUILayout.PropertyField(buildingSpriteSprite);
-			EditorGUILayout.PropertyField(buildingSpriteDestroyedSprite);
+//			EditorGUILayout.PropertyField(buildingSpriteSprite);
+//			EditorGUILayout.PropertyField(buildingSpriteDestroyedSprite);
 
 //			EditorGUILayout.EnumPopup(testInt);
 		}
@@ -88,6 +92,21 @@ public class SpriteLibraryEditor : Editor {
 		if (GUILayout.Button ("Add")){
 			enemySpritesList.InsertArrayElementAtIndex(enemySpritesList.arraySize);
 		}
+
+
+		EditorGUILayout.LabelField("Projectiles");
+
+		for (int i = 0; i < projectileSpritesList.arraySize; i++) {
+			SerializedProperty projectileSprite = projectileSpritesList.GetArrayElementAtIndex(i);
+		
+			GUIHelpers.ClassField<ProjectileSprite>(projectileSprite);
+		}
+		if (GUILayout.Button ("Add")){
+			projectileSpritesList.InsertArrayElementAtIndex(projectileSpritesList.arraySize);
+		}
+
+
+
 
 		if(EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
 

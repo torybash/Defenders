@@ -73,7 +73,7 @@ public class WaveController : MonoBehaviour {
 			//Is time for next wave part?
 			WavePart part = currWave.waveParts[wavePartIncr];
 			while (Time.time > waveStartTime + part.time){
-				Debug.Log("Spawning part at: " + (Time.time - waveStartTime));
+//				Debug.Log("Spawning part at: " + (Time.time - waveStartTime));
 				StartCoroutine(SpawnWavePart(part));
 
 				wavePartIncr++;
