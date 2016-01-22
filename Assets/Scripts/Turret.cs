@@ -6,7 +6,7 @@ public class Turret : MonoBehaviour {
 	//Inspector refs
 	[Header("References")]
 	[SerializeField] Transform bulletSpawnPosT;
-	[SerializeField] Transform rotatePart;
+	[SerializeField] Transform turretHead;
 
 	//Prefabs
 	[Header("Prefabs")]
@@ -18,6 +18,10 @@ public class Turret : MonoBehaviour {
 
 	Building building;
 
+
+	public Transform TurretHead{
+		get{ return turretHead;}
+	}
 
 
 	public TurretStats Stats{
@@ -36,8 +40,8 @@ public class Turret : MonoBehaviour {
 
 
 		BuildingType bldType = GetComponent<Building>().stats.def.type;
-		GetComponent<Turret>().rotatePart.gameObject.SetActive(true);
-		GetComponent<Turret>().rotatePart.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetBuildingTurretHeadSprite(bldType);
+		GetComponent<Turret>().turretHead.gameObject.SetActive(true);
+		GetComponent<Turret>().turretHead.GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetBuildingTurretHeadSprite(bldType);
 
 
 //		Debug.Log("initialized turret with TurretDefinition: "+  def);
@@ -58,11 +62,13 @@ public class Turret : MonoBehaviour {
 	public void ShootAt(Vector2 pos){
 
 		Vector2 dir = pos - (Vector2)transform.position;
-		if (rotatePart != null) rotatePart.rotation = Quaternion.AngleAxis(dir.VectorAngle(), Vector3.forward);
+		if (turretHead != null) turretHead.rotation = Quaternion.AngleAxis(dir.VectorAngle(), Vector3.forward);
 
 		GameObject bulletGO = (GameObject) Instantiate(bulletPrefab, bulletSpawnPosT.position, Quaternion.identity);
 		Bullet bullet = bulletGO.GetComponent<Bullet>();
 		bullet.Init(pos, stats.def.type, stats.def.bulletSpeed);
+
+		GameController.I.audioCtrl.PlayShoot();
 	}
 }
 

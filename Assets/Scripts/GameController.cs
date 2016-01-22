@@ -10,6 +10,7 @@ public class GameController : MonoBehaviour {
 	public UIController uiCtrl;
 	public BuildingController buildingCtrl;
 	public ParticleController partCtrl;
+	public AudioController audioCtrl;
 
 	//Object references
 	[Header("References")]
@@ -52,6 +53,7 @@ public class GameController : MonoBehaviour {
 
 
 	[SerializeField] Transform groundPlane;
+	[SerializeField] Transform ground;
 
 	public Transform GroundPlane{
 		get{ return groundPlane;}
@@ -72,6 +74,7 @@ public class GameController : MonoBehaviour {
 		uiCtrl = GetComponent<UIController>();
 		buildingCtrl = GetComponent<BuildingController>();
 		partCtrl = GetComponent<ParticleController>();
+		audioCtrl = GetComponent<AudioController>();
 
 //		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
 //			turretAmmo.Add((ProjectileType) i, 0);
@@ -85,6 +88,7 @@ public class GameController : MonoBehaviour {
 		buildingCtrl.Init();
 		uiCtrl.Init();
 		partCtrl.Init();
+		audioCtrl.Init();
 		Init();
 
 		//DEBUG
@@ -151,6 +155,9 @@ public class GameController : MonoBehaviour {
 
 	private void Init(){
 
+		float groundHeight = ground.transform.localScale.y;
+		ground.position = new Vector3(0, camCtrl.GetBottomY() + buildingFieldYAboveBottom - buildFieldHeight/2f - groundHeight/2f);
+
 		money = 0;
 //		turretAmmo[ProjectileType.EXPLODING] = 10;
 
@@ -216,6 +223,8 @@ public class GameController : MonoBehaviour {
 //		Timer.CallDelayed(GoToIntermission, endWaveDuration);
 
 		SwitchState(GameState.WAVE_ENDED);
+	
+		audioCtrl.PlayComplete();
 	}
 
 

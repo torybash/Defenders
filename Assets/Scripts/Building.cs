@@ -29,6 +29,10 @@ public class Building : MonoBehaviour {
 		}else{
 			GetComponent<SpriteRenderer>().sprite = SpriteLibrary.I.GetBuildingSprite(stats.def.type);
 		}
+
+		if (stats.def.isTurret){
+			if (GetComponent<Turret>().TurretHead != null) GetComponent<Turret>().TurretHead.gameObject.SetActive(!isDestroyed);
+		}
 	}
 
 

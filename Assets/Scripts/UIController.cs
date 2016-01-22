@@ -18,6 +18,8 @@ public class UIController : MonoBehaviour {
 	[SerializeField] WaveInfoPanel waveInfoPanel;
 	[SerializeField] BuildingInfoPanel buildingInfoPanel;
 
+	[SerializeField] RectTransform clickBlocker;
+
 	[Header("Prefabs")]
 	[SerializeField] GameObject buildPanelElementPrefab;
 
@@ -100,6 +102,7 @@ public class UIController : MonoBehaviour {
 
 
 	public void BuildClicked(){
+		
 		OpenPanel(panelBuildMenu);
 		hasSelectedBuildingType = false;
 	}
@@ -125,11 +128,15 @@ public class UIController : MonoBehaviour {
 	private void CloseCurrentPanel(){
 		if (currentPanel != null) currentPanel.gameObject.SetActive(false);
 		currentPanel = null;
+		clickBlocker.gameObject.SetActive(false);
 	}
 
 	private void OpenPanel(RectTransform panel){
 		CloseCurrentPanel();
 		currentPanel = panel;
+		clickBlocker.gameObject.SetActive(true);
+		clickBlocker.SetSiblingIndex(currentPanel.transform.GetSiblingIndex() - 1);
+//		currentPanel.transform.SetSiblingIndex
 		panel.gameObject.SetActive(true);
 	}
 

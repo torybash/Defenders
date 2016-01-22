@@ -33,6 +33,7 @@ public class BuildingController : MonoBehaviour {
 
 	BuildingType placingBuildingType;
 
+	GameObject ghostContainer;
 
 	public float shotTimerOffset;
 	public float nextAllowedShotTime;
@@ -46,6 +47,8 @@ public class BuildingController : MonoBehaviour {
 
 
 		buildings = new List<Building>();
+
+		ghostContainer = new GameObject("GhostContainer");
 	}
 
 	public void Init(){
@@ -64,6 +67,7 @@ public class BuildingController : MonoBehaviour {
 			for (int y = 0; y < gameCtrl.buildFieldHeight; y++) {
 				GameObject buildingGO = (GameObject) Instantiate(buildingGhostPrefab, slotToPosition[x, y], Quaternion.identity);
 				buildingGhosts[x, y] = buildingGO;
+				buildingGO.transform.SetParent(ghostContainer.transform);
 			}
 		}
 		HideBuildingGhosts();
@@ -79,7 +83,9 @@ public class BuildingController : MonoBehaviour {
 		//Spawn btm center turret
 		BuildBuilding(4, 0, BuildingType.TURRET_MINIGUN);
 		BuildBuilding(3, 0, BuildingType.POWER_STATION);
-		BuildBuilding(5, 0, BuildingType.WEAPON_FACTORY);
+		BuildBuilding(2, 0, BuildingType.POWER_STATION);
+		BuildBuilding(6, 0, BuildingType.POWER_STATION);
+		BuildBuilding(5, 0, BuildingType.POWER_STATION);
 	}
 
 
@@ -87,7 +93,6 @@ public class BuildingController : MonoBehaviour {
 		//TODO only add offset if weapons are the same
 		float cooldown = turrets[0].Stats.def.cooldownDuration;
 		float offset = cooldown / (float)turrets.Count;
-		int c = 0;
 
 		shotTimerOffset = offset;
 
@@ -102,7 +107,6 @@ public class BuildingController : MonoBehaviour {
 	public void IntermissionStarted(){
 		//Repair all buildings - TODO cost money or sumthin?
 		foreach (var item in buildings) {
-			SetBuildingState(item, false);
 			item.SetBuildingState(false);
 		}
 	}
@@ -252,13 +256,9 @@ public class BuildingController : MonoBehaviour {
 
 
 	public void BuildingDestroyed(Building building){
-		SetBuildingState(building, true);
+		building.SetBuildingState(true);
 	}
 
-	private void SetBuildingState(Building building, bool destroyed){
-
-
-	}
 }
 
 

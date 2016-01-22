@@ -17,6 +17,11 @@ public class BaseParticleSys : MonoBehaviour {
 		Ps.Play();
 	}
 
+	public virtual void Stop(){
+
+		Ps.Stop();
+	}
+
 	public virtual float GetLifetime(){
 		return Ps.duration + Ps.startLifetime;
 	}

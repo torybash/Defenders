@@ -21,8 +21,12 @@ public class WaveController : MonoBehaviour {
 	//Controller ref
 	GameController gameCtrl;
 
+	GameObject enemyContainer;
+
 	void Awake(){
 		gameCtrl = GetComponent<GameController>();
+
+		enemyContainer = new GameObject("EnemyContainer");
 	}
 
 	public void Init(){
@@ -91,6 +95,8 @@ public class WaveController : MonoBehaviour {
 
 			enemy.Init(EnemyLibrary.I.GetDefinition(part.type));
 			currWaveEnemies.Add(enemyGO.GetInstanceID(), enemy);
+
+			enemyGO.transform.SetParent(enemyContainer.transform);
 
 			if (i < part.count - 1){ //if is not last part
 				yield return new WaitForSeconds(part.interval);

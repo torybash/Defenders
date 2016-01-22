@@ -29,6 +29,8 @@ public class Enemy : MonoBehaviour {
 
 	EnemyState state;
 
+	BaseParticleSys crashParticSys;
+
 	void Awake(){
 		gameCtrl = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
 
@@ -97,6 +99,7 @@ public class Enemy : MonoBehaviour {
 		stats.currHp -= 1;
 
 		if (state == EnemyState.ACTIVE){
+			
 			if (stats.currHp <= 0){ //Die
 				
 				Killed(forceDir);
@@ -107,6 +110,7 @@ public class Enemy : MonoBehaviour {
 				if (currGotHitTween != null) currGotHitTween.Complete();
 				currGotHitTween = HOTween.To(GetComponent<SpriteRenderer>(), 0.1f, new TweenParms().Prop("color", hitColor).Ease(EaseType.EaseInOutCirc).Loops(2, LoopType.Yoyo));
 
+				GameController.I.audioCtrl.PlayHit();
 
 		//			if (currGotHitCR != null) StopCoroutine(currGotHitCR);
 		//			currGotHitCR = StartCoroutine(GotHitEffect());
@@ -116,6 +120,7 @@ public class Enemy : MonoBehaviour {
 				Explode();
 //			}
 
+
 		}
 	}
 
@@ -124,10 +129,15 @@ public class Enemy : MonoBehaviour {
 		gameCtrl.waveCtrl.EnemyKilled(this);
 		state = EnemyState.DESTROYED;
 
-		if (Random.Range(0, 1f) > 0.7f){ //Crash?
+
+
+		if (Random.Range(0, 1f) > 0.1f){ //Crash?
 			rb.gravityScale = 1f;
 			rb.AddForce(forceDir * Random.Range(1.5f, 3.0f), ForceMode2D.Impulse);
 			rb.AddTorque(Random.Range(-5f, 5f));
+
+
+			crashParticSys = gameCtrl.partCtrl.AttachParticlesTo(ParticleType.CRASH, transform);
 		}else{ //Or explode immidetly
 			Explode();
 		}
@@ -143,6 +153,13 @@ public class Enemy : MonoBehaviour {
 		gameCtrl.partCtrl.CreateParticlesAt(ParticleType.EXPLOSION, transform.position);
 		gameCtrl.partCtrl.CreateParticlesAt(ParticleType.DEBRIS, transform.position);
 
+		if (crashParticSys != null){ 
+			crashParticSys.transform.parent = null;
+			crashParticSys.Stop();
+		}
+
+		GameController.I.audioCtrl.PlayExplode();
+
 		Destroy(gameObject);
 	}
 
@@ -155,9 +172,9 @@ public class Enemy : MonoBehaviour {
 //		yield return new WaitForSeconds(2f);
 //	}
 
-//	void OnCollisionEnter2D(Collision2D collision){
-//		CollidedWith(collision.collider);
-//	}
+	void OnCollisionEnter2D(Collision2D collision){
+		CollidedWith(collision.collider);
+	}
 
 	void OnTriggerEnter2D(Collider2D coll){
 		CollidedWith(coll);
