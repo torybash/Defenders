@@ -305,6 +305,9 @@ public class GameController : MonoBehaviour {
 		uiCtrl.SwitchState(state);
 	}
 
+	public void LostGame(){
+		Application.LoadLevel("Menu");
+	}
 
 
 	//COROUTINES

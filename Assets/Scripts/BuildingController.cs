@@ -257,6 +257,18 @@ public class BuildingController : MonoBehaviour {
 
 	public void BuildingDestroyed(Building building){
 		building.SetBuildingState(true);
+
+		bool allDestroyed = true;
+		foreach (var item in buildings) {
+			if (!item.isDestroyed){
+				allDestroyed = false;
+				break;
+			}
+		}
+
+		if (allDestroyed){
+			gameCtrl.LostGame();
+		}
 	}
 
 }
