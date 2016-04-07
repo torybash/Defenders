@@ -3,14 +3,13 @@ using System.Collections;
 
 public class Explosion : MonoBehaviour {
 
-	float goalSize;
-
 	float timeFull;
 	float timeDisappear;
 
 
-	float timeToFull = 1.0f;
-	float timeToDisappear = 0.25f;
+	[SerializeField] float timeToFull = 0.56f;
+	[SerializeField] float timeToDisappear = 0.25f;
+    [SerializeField] float goalSize = 2.5f;
 	
 	// Update is called once per frame
 	void Update () {
@@ -29,10 +28,6 @@ public class Explosion : MonoBehaviour {
 
 	public void Init(){
 
-
-
-
-		goalSize = 3.2f;
 		timeFull = Time.time + timeToFull;
 		timeDisappear = Time.time + timeToFull + timeToDisappear;
 	}

@@ -47,7 +47,10 @@ public class TurretDefinition{
 	public ProjectileType type;
 	public float cooldownDuration;
 	public int maxBulletAmount;
-	public float bulletSpeed;
+    public float bulletSpeed;
+
+    public float reloadDuration;
+    public int maxAmmo;
 
 	//IDEAS
 	//overheatTime, ammoMax, ammoBeforeReloading+reloadTime, 

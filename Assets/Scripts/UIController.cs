@@ -31,6 +31,8 @@ public class UIController : MonoBehaviour {
 	BuildingType selectedBuildingType;
 
 
+
+
 	//Controller ref
 	GameController gameCtrl;
 
@@ -58,6 +60,8 @@ public class UIController : MonoBehaviour {
 		waveInfoPanel.Init(this);
 
 	}
+
+
 
 	public void ShowWaveIntro(int waveNr){
 		waveInfoPanel.ShowWaveIntro(waveNr);
@@ -108,6 +112,8 @@ public class UIController : MonoBehaviour {
 	}
 
 	public void SellClicked(){
+        CloseCurrentPanel();
+        GameController.I.buildingCtrl.RemoveSelectedBuilding();
 //		panelBuildMenu.gameObject.SetActive(true);
 	}
 

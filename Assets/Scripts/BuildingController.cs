@@ -35,8 +35,16 @@ public class BuildingController : MonoBehaviour {
 
 	GameObject ghostContainer;
 
-	public float shotTimerOffset;
-	public float nextAllowedShotTime;
+    public class TurretSyncData {
+        public int nextTurretIdx;
+        public float shotTimerOffset;
+        public float nextAllowedShotTime;
+    }
+
+    Dictionary<BuildingType, TurretSyncData> turretSyncDataDict = new Dictionary<BuildingType, TurretSyncData>();
+    public Dictionary<BuildingType, TurretSyncData> TurretSyncDataDict {
+        get { return turretSyncDataDict; }
+    }
 
 	void Awake(){
 		gameCtrl = GetComponent<GameController>();
@@ -44,9 +52,6 @@ public class BuildingController : MonoBehaviour {
 		buildingSlots = new Building[gameCtrl.buildFieldWidth, gameCtrl.buildFieldHeight];
 		slotToPosition = new Vector2[gameCtrl.buildFieldWidth, gameCtrl.buildFieldHeight];
 		buildingGhosts = new GameObject[gameCtrl.buildFieldWidth, gameCtrl.buildFieldHeight];
-
-
-		buildings = new List<Building>();
 
 		ghostContainer = new GameObject("GhostContainer");
 	}
@@ -78,23 +83,59 @@ public class BuildingController : MonoBehaviour {
 		GameObject buildingField = (GameObject) Instantiate(buildingFieldPrefab, pos, Quaternion.identity);
 
 		//Init variables
+        buildings = new List<Building>();
+
 		turrets = new List<Turret>();
+        turretSyncDataDict.Add(BuildingType.TURRET_ROCKET, new TurretSyncData());
+        turretSyncDataDict.Add(BuildingType.TURRET_MINIGUN, new TurretSyncData());
 
 		//Spawn btm center turret
-		BuildBuilding(4, 0, BuildingType.TURRET_MINIGUN);
-		BuildBuilding(3, 0, BuildingType.POWER_STATION);
-		BuildBuilding(2, 0, BuildingType.POWER_STATION);
-		BuildBuilding(6, 0, BuildingType.POWER_STATION);
-		BuildBuilding(5, 0, BuildingType.POWER_STATION);
+        //BuildBuilding(4, 0, BuildingType.TURRET_ROCKET);
+        //BuildBuilding(3, 0, BuildingType.TURRET_ROCKET);
+        BuildBuilding(2, 0, BuildingType.TURRET_ROCKET);
+        BuildBuilding(6, 0, BuildingType.TURRET_ROCKET);
+        //BuildBuilding(5, 0, BuildingType.TURRET_ROCKET);
+
+        //BuildBuilding(4, 0, BuildingType.TURRET_MINIGUN);
+        //BuildBuilding(3, 0, BuildingType.TURRET_MINIGUN);
+        //BuildBuilding(2, 0, BuildingType.TURRET_MINIGUN);
+        //BuildBuilding(6, 0, BuildingType.TURRET_MINIGUN);
+        //BuildBuilding(5, 0, BuildingType.TURRET_MINIGUN);
+
+        //BuildBuilding(4, 0, BuildingType.TURRET_MINIGUN);
+        //BuildBuilding(3, 0, BuildingType.POWER_STATION);
+        //BuildBuilding(2, 0, BuildingType.POWER_STATION);
+        //BuildBuilding(6, 0, BuildingType.POWER_STATION);
+        //BuildBuilding(5, 0, BuildingType.POWER_STATION);
 	}
 
 
 	public void InitWave(){
 		//TODO only add offset if weapons are the same
-		float cooldown = turrets[0].Stats.def.cooldownDuration;
-		float offset = cooldown / (float)turrets.Count;
+        for (int i = (int) BuildingType.TURRET_ROCKET; i < (int) BuildingType.TURRET_MINIGUN + 1; i++) {
 
-		shotTimerOffset = offset;
+            int turretOfTypeCount = 0;
+            for (int j = 0; j < turrets.Count; j++) {
+                if (turrets[0].Building.type == ((BuildingType[])System.Enum.GetValues(typeof(BuildingType)))[i]) {
+                    turretOfTypeCount++;
+                }
+            }
+
+            if (turretOfTypeCount > 0) {
+                float cooldown = turrets[0].Stats.def.cooldownDuration;
+                float offset = cooldown / (float)turretOfTypeCount;
+
+                turretSyncDataDict[(BuildingType)i].nextTurretIdx = 0;
+                turretSyncDataDict[(BuildingType)i].shotTimerOffset = offset;
+            }
+
+        }
+        //float cooldown = turrets[0].Stats.def.cooldownDuration;
+        //float offset = cooldown / (float)turrets.Count;
+
+        //shotTimerOffset = offset;
+
+		
 
 //		print("shotTimerOffset: " + shotTimerOffset);
 //		public float shotTimerOffset;
@@ -112,23 +153,38 @@ public class BuildingController : MonoBehaviour {
 	}
 
 
-	public void BuildingClicking(Vector2 mousePos){
+	public bool BuildingClicking(Vector2 mousePos){
 		RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
 		if (hit.collider != null && hit.collider.GetComponent<Building>() != null){
-			//Show scaffold-selector
-			if (buildingSelector == null) buildingSelector = Instantiate(buildingSelectorPrefab);
-			buildingSelector.SetActive(true);
-			buildingSelector.transform.position = hit.collider.transform.position;
+
+            switch (GameController.I.State)
+	        {
+                case GameState.GAME:
+                    if (hit.collider.GetComponent<Building>().stats.def.isTurret){
+                        hit.collider.GetComponent<Turret>().ToggleActivated();
+                    }
+                    break;
+                case GameState.INTERMISSION:
+                    //Show scaffold-selector
+                    if (buildingSelector == null) buildingSelector = Instantiate(buildingSelectorPrefab);
+                    buildingSelector.SetActive(true);
+                    buildingSelector.transform.position = hit.collider.transform.position;
+
+                    //Set values
+                    selectedBuilding = hit.collider.gameObject;
+
+                    //UI
+                    gameCtrl.uiCtrl.BuildingClicked(selectedBuilding.GetComponent<Building>());
+                    break;
+                default:
+                break;
+	        }
 
 
 
-			//Set values
-			selectedBuilding = hit.collider.gameObject;
-
-
-			//UI
-			gameCtrl.uiCtrl.BuildingClicked(selectedBuilding.GetComponent<Building>());
+            return true;
 		}
+        return false;
 	}
 
 
@@ -212,7 +268,7 @@ public class BuildingController : MonoBehaviour {
 		//Create building
 		GameObject buildingGO = (GameObject) Instantiate(buildingPrefab, pos, Quaternion.identity);
 		Building building = buildingGO.GetComponent<Building>();
-		building.Init(type, bd);
+		building.Init(type, bd, x, y);
 
 		//Initialise cannon
 		if (bd.isTurret){
@@ -271,6 +327,16 @@ public class BuildingController : MonoBehaviour {
 		}
 	}
 
+
+    public void RemoveSelectedBuilding() {
+        buildingSlots[selectedBuilding.GetComponent<Building>().stats.x, selectedBuilding.GetComponent<Building>().stats.y] = null;
+        buildings.Remove(selectedBuilding.GetComponent<Building>());
+        if (selectedBuilding.GetComponent<Building>().stats.def.isTurret) turrets.Remove(selectedBuilding.GetComponent<Turret>());
+
+        Destroy(selectedBuilding);
+        buildingSelector.SetActive(false);
+        selectedBuilding = null;
+    }
 }
 
 

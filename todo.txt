@@ -1,3 +1,7 @@
+*Tower sprites different
+*Sell
+*ammo count, reload time ui
+
 *Optimize - needs test
 *Make crashing particle effect
 

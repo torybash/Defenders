@@ -62,8 +62,7 @@ public class DebrisParticles : BaseParticleSys {
 
 
 		templatePs.collision.SetPlane(0, GameController.I.GroundPlane);
-
-
+        //Debug.Log(" GameController.I.GroundPlane: " + GameController.I.GroundPlane);
 //		ps = GetComponent<ParticleSystem>();
 
 //		templatePs.GetComponent<CollisionMo
@@ -107,6 +106,10 @@ public class DebrisParticles : BaseParticleSys {
 		for (int i = 0; i < childSystems.Length; i++) {
 
 			childSystems[i].Emit(Random.Range(1, 3));
+
+            childSystems[i].collision.SetPlane(0, GameController.I.GroundPlane);
+
+
 //			Color clr = clrFlags[Random.Range(0, clrFlags.Length)];
 
 //			ParticleSystem.EmitParams prms = new ParticleSystem.EmitParams();

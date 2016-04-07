@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: d9699f2b114ef4e699c52d4a9d5d5a86
-timeCreated: 1453402152
+timeCreated: 1460060331
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -13,6 +13,7 @@ TextureImporter:
     21300012: buildings_sheet_2
     21300014: buildings_sheet_3
     21300016: buildings_sheet_4
+    21300018: buildings_sheet_5
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -67,7 +68,7 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
       - - {x: -16, y: 16}
@@ -128,6 +129,23 @@ TextureImporter:
         - {x: 16, y: 2}
         - {x: 14, y: 4}
     - name: buildings_sheet_4
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -15, y: 6}
+        - {x: -15, y: -6}
+        - {x: 11, y: -6}
+        - {x: 16, y: -5}
+        - {x: 16, y: 4}
+        - {x: 12, y: 6}
+    - name: buildings_sheet_5
       rect:
         serializedVersion: 2
         x: 0

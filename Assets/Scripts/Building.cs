@@ -36,8 +36,8 @@ public class Building : MonoBehaviour {
 	}
 
 
-	public void Init(BuildingType type, BuildingDefinition bd){
-		stats = new BuildingStats(bd);
+	public void Init(BuildingType type, BuildingDefinition bd, int x, int y){
+		stats = new BuildingStats(bd, x, y);
 
 	}
 }
@@ -48,10 +48,13 @@ public class BuildingStats{
 
 	public int hpLeft;
 	public List<BuildingUpgrade> upgrades;
+    public int x;
+    public int y;
 
-
-	public BuildingStats(BuildingDefinition bd){
+	public BuildingStats(BuildingDefinition bd, int x, int y){
 		this.def = bd;
+        this.x = x;
+        this.y = y;
 
 		hpLeft = bd.hpMax;
 //		upgrades = TODO

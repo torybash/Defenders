@@ -39,7 +39,9 @@ public class GameController : MonoBehaviour {
 	GameState state;
 	IntermissionState intmsnState;
 
-
+    public GameState State {
+        get { return state; }
+    }
 
 
 	public int currWaveIdx;
@@ -49,7 +51,8 @@ public class GameController : MonoBehaviour {
 	public int powerUse;
 	public int powerMax;
 
-//	public Dictionary<ProjectileType, int> turretAmmo = new Dictionary<ProjectileType, int>();
+    public Dictionary<ProjectileType, int> turretAmmo = new Dictionary<ProjectileType, int>();
+    public Dictionary<ProjectileType, float> turretReloadTimers = new Dictionary<ProjectileType, float>();
 
 
 	[SerializeField] Transform groundPlane;
@@ -76,9 +79,10 @@ public class GameController : MonoBehaviour {
 		partCtrl = GetComponent<ParticleController>();
 		audioCtrl = GetComponent<AudioController>();
 
-//		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
-//			turretAmmo.Add((ProjectileType) i, 0);
-//		}
+        foreach (ProjectileType typ in System.Enum.GetValues(typeof(ProjectileType))) {
+            turretAmmo[typ] = -1;
+            turretReloadTimers[typ] = 0;
+        }
 	}
 
 
@@ -97,22 +101,22 @@ public class GameController : MonoBehaviour {
 	
 	void Update () {
 		Vector2 mousePos = camCtrl.cam.ScreenToWorldPoint(Input.mousePosition);
-		bool mousePressed = Input.GetMouseButton(0);
-		switch (state) {
+        bool mousePressed = Input.GetMouseButton(0);
+        bool mouseClicked = Input.GetMouseButtonDown(0);
+        switch (state) {
 		case GameState.GAME:
 
 			if (mousePressed){
-				Shooting(mousePos);
-				if (mousePressed) buildingCtrl.BuildingClicking(mousePos);
+                bool clickedBuilding = mouseClicked && buildingCtrl.BuildingClicking(mousePos);
+				if (!clickedBuilding) Shooting(mousePos);
 			}
-
 
 			break;
 		case GameState.INTERMISSION:
 
 			switch (intmsnState) {
 			case IntermissionState.NORMAL:
-				if (mousePressed) buildingCtrl.BuildingClicking(mousePos);
+                if (mouseClicked) buildingCtrl.BuildingClicking(mousePos);
 				break;
 			case IntermissionState.PLACING_BUILDING:
 				if (mousePressed) buildingCtrl.PlacingBuildingClicking(mousePos);
@@ -128,26 +132,45 @@ public class GameController : MonoBehaviour {
 		}
 
 		waveCtrl.GUpdate();
+    
+
+        //RELOAD
+        foreach (ProjectileType typ in System.Enum.GetValues(typeof(ProjectileType))) {
+            if (turretAmmo[typ] <= 0 && Time.time > turretReloadTimers[typ]) {
+                foreach (Turret turret in buildingCtrl.turrets) {
+                    if (turret.Stats.def.type == typ) {
+                        turretAmmo[typ] += turret.Stats.def.maxAmmo;
+                    }
+                }
+                //turretAmmo[typ] 
+            }
+        }
 	}
 
 	private void Shooting(Vector2 mousePos){
 
-		if (Time.time >= buildingCtrl.nextAllowedShotTime){
-			foreach (Turret turret in buildingCtrl.turrets) {
-				//Has ammo for turret?
-//				if (turretAmmo[turret.Stats.def.type] > 0){
+        //if (Time.time >= buildingCtrl.nextAllowedShotTime){
+        //int c = 0;
+		foreach (Turret turret in buildingCtrl.turrets) {
+            //if (Time.time >= buildingCtrl.nextAllowedShotTime) {
+            //Debug.Log("turret " + c++ + " trying shooting - type: " + turret.Building.type + ", nextAllowedShotTime: " + buildingCtrl.TurretSyncDataDict[turret.Building.type].nextAllowedShotTime + ", shotTimerOffset: " + buildingCtrl.TurretSyncDataDict[turret.Building.type].shotTimerOffset + ", time: "+ Time.time);
+            if (turretAmmo[turret.Stats.def.type] <= 0) continue;
 
-					bool turretShot = turret.TryShootAt(mousePos);
-					if (turretShot){ 
-						buildingCtrl.nextAllowedShotTime = Time.time + buildingCtrl.shotTimerOffset;
-//						turretAmmo[turret.Stats.def.type] -= 1;
-						UpdateInfoPanel();
-						break;
-					}
-//				}
-			}
+            if (Time.time >= buildingCtrl.TurretSyncDataDict[turret.Building.type].nextAllowedShotTime) {
+                bool turretShot = turret.TryShootAt(mousePos);
+			    if (turretShot){
+                    //buildingCtrl.nextAllowedShotTime = Time.time + buildingCtrl.shotTimerOffset;
+                    buildingCtrl.TurretSyncDataDict[turret.Building.type].nextAllowedShotTime = Time.time + buildingCtrl.TurretSyncDataDict[turret.Building.type].shotTimerOffset;
+
+                    turretAmmo[turret.Stats.def.type]--;
+                    if (turretAmmo[turret.Stats.def.type] <= 0) {
+                        turretReloadTimers[turret.Stats.def.type] = Time.time + turret.Stats.def.reloadDuration;
+                    }
+                    UpdateInfoPanel();
+				    break;
+			    }
+            }
 		}
-
 	}
 
 
@@ -159,7 +182,7 @@ public class GameController : MonoBehaviour {
 		ground.position = new Vector3(0, camCtrl.GetBottomY() + buildingFieldYAboveBottom - buildFieldHeight/2f - groundHeight/2f);
 
 		money = 0;
-//		turretAmmo[ProjectileType.EXPLODING] = 10;
+        //turretAmmo[ProjectileType.EXPLODING] = 10;
 
 
 		//Set values
@@ -185,8 +208,8 @@ public class GameController : MonoBehaviour {
 
 	private void UpdateInfoPanel(){
 		//UI
-//		uiCtrl.UpdateInfoPanel(money, score, powerUse, powerMax, turretAmmo[ProjectileType.EXPLODING], turretAmmo[ProjectileType.NORMAL]);
-		uiCtrl.UpdateInfoPanel(money, score, powerUse, powerMax, 0, 0);
+        uiCtrl.UpdateInfoPanel(money, score, powerUse, powerMax, turretAmmo[ProjectileType.EXPLODING], turretAmmo[ProjectileType.NORMAL]);
+        //uiCtrl.UpdateInfoPanel(money, score, powerUse, powerMax, 0, 0);
 	}
 
 	public void BuyBuilding(BuildingType type){
@@ -252,21 +275,21 @@ public class GameController : MonoBehaviour {
 
 
 	public void UpdateAmmoAndPower(){
-//		Dictionary<TurretType, int> ammo = new Dictionary<TurretType, int>();
 
-
-//		for (int i = 0; i < (int)ProjectileType.AMOUNT; i++) {
-//			turretAmmo[(ProjectileType) i] = 0;
-//		}
+        foreach (ProjectileType typ in System.Enum.GetValues(typeof(ProjectileType))) {
+            turretAmmo[typ] = -1;
+        }
 		powerUse = 0;
 		powerMax = 0;
 		foreach (Building building in buildingCtrl.buildings) {
 			if (building == null || building.stats == null) continue;
 			BuildingDefinition bd = BuildingLibrary.I.GetDefinition(building.stats.def.type);
-//			if (building.stats.type == BuildingType.TURRET_ROCKET || building.stats.type == BuildingType.TURRET_MINIGUN){
-//				Turret turret = building.GetComponent<Turret>();
-//				turretAmmo[turret.Stats.def.type] += turret.Stats.def.ammoMax;
-//			}
+            if (building.stats.def.type == BuildingType.TURRET_ROCKET || building.stats.def.type == BuildingType.TURRET_MINIGUN) {
+				Turret turret = building.GetComponent<Turret>();
+                if (turretAmmo[turret.Stats.def.type] == -1) turretAmmo[turret.Stats.def.type] = 0;
+
+                turretAmmo[turret.Stats.def.type] += turret.Stats.def.maxAmmo;
+            }
 
 			if (bd.powerUse > 0){
 				powerMax += bd.powerUse;
