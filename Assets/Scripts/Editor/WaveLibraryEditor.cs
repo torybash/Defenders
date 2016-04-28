@@ -22,6 +22,7 @@ public class WaveLibraryEditor : Editor {
 	GUIStyle headerStyle = new GUIStyle();
 	GUIStyle redStyle = new GUIStyle();
 
+    const float maxSideX = 2.5f;
 
 	void OnEnable(){
 		
@@ -87,6 +88,7 @@ public class WaveLibraryEditor : Editor {
 //		}
 //		GUI.EndGroup();
 
+        WaveLibrary theTarget = (WaveLibrary)target;
 
 
 		if (showFoldout == null || showFoldout.Length != defsProp.arraySize){
@@ -138,24 +140,32 @@ public class WaveLibraryEditor : Editor {
 
 
 					float width = EditorGUIUtility.currentViewWidth - 50, height = duration * 25 + 15;
-					Rect wavePartsRect = GUILayoutUtility.GetRect(width, height);
+					Rect wavePartsRect = GUILayoutUtility.GetRect(width, height+2);
 					GUI.BeginGroup(wavePartsRect);
-					GUI.Box(new Rect(0, 0, width, height - 1), "");
+					GUI.Box(new Rect(0, 0, width, height+1), "");
 					int c = 0;
+                    
 					foreach (WavePart wavePart in waveParts) {
-						float x = width * ((wavePart.startX + 2.5f) / 5f); //0 - 200
-						float y = wavePart.time * 25; //0 - duration*25
+                        float x = 15 + (width-30) * ((wavePart.startX + maxSideX) / (maxSideX*2)); //0 - 200
+						float y = wavePart.time * 25 + 15; //0 - duration*25
 
 						Color origColor = GUI.backgroundColor;
 						if (currSelectedPartIdx[i] == c){
 							GUI.backgroundColor = Color.gray;
 						}
 
-						if (GUI.Button(new Rect(x, y, 20, 20), ""+wavePart.count)){
-//							waveParts.Remove(wavePart);
-//							break;
-							currSelectedPartIdx[i] = c;
-						}
+                        //Debug.Log("wavePart.type: " + wavePart.type);
+                        Sprite sprite = theTarget.GetComponent<SpriteLibrary>().GetEnemySprite(wavePart.type);
+                        
+                        //if (GUI.Button(new Rect(x, y, 20, 20), "" + wavePart.count)) {
+                        //GUI.DrawTextureWithTexCoords(new Rect(x, y, 20, 20), GetTextureFromSprite(sprite), sprite.textureRect);
+
+                        Rect buttonRect = new Rect(x - 15, y - 15, 30, 30);
+                        if (GUI.Button(buttonRect, "")) {
+                            currSelectedPartIdx[i] = c;
+                        }
+                        GUI.DrawTexture(buttonRect, GetTextureFromSprite(sprite));
+                        GUI.Label(buttonRect, "" + wavePart.count);
 						GUI.backgroundColor = origColor;
 						c++;
 					}
@@ -286,6 +296,20 @@ public class WaveLibraryEditor : Editor {
 
 	}
 
+
+    public static Texture2D GetTextureFromSprite(Sprite sprite) {
+        if (sprite.rect.width != sprite.texture.width) {
+            Texture2D newText = new Texture2D((int)sprite.rect.width, (int)sprite.rect.height);
+            Color[] newColors = sprite.texture.GetPixels((int)sprite.textureRect.x,
+                                                         (int)sprite.textureRect.y,
+                                                         (int)sprite.textureRect.width,
+                                                         (int)sprite.textureRect.height);
+            newText.SetPixels(newColors);
+            newText.Apply();
+            return newText;
+        } else
+            return sprite.texture;
+    }
 
 	private void WavePartField(WavePart wavePart){
 		int startIndent = EditorGUI.indentLevel;

@@ -1,3 +1,24 @@
+## [1.4.1] - 2016-4-12
+### Fixed
+- Amazon stores - "App failed to call Purchasing Fullfillment" error caused by Unity IAP misuse of Amazon's notifyFulfillment mechanism.
+
+### Added
+- Editor API call for toggling between Android billing platforms in build scripts; UnityPurchasingEditor.TargetAndroidStore(AndroidStore). See below for usage.
+
+```csharp
+using UnityEngine;
+using UnityEngine.Purchasing;
+using UnityEditor;
+
+// A sample Editor script.
+public class MyEditorScript {
+	void AnEditorMethod() {
+		// Set the store to Google Play.
+		UnityPurchasingEditor.TargetAndroidStore(AndroidStore.GooglePlay);
+	}
+}
+```
+
 ## [1.4.0] - 2016-4-5
 ### Added
 - Amazon Apps & Amazon underground support. Preliminary documentation is available [here](https://docs.google.com/document/d/1QxHRo7DdjwNIUAm0Gb4J3EW3k1vODJ8dGdZZfJwetYk/edit?ts=56f97483).

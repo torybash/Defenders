@@ -102,11 +102,11 @@ public class BuildingController : MonoBehaviour {
         //BuildBuilding(6, 0, BuildingType.TURRET_MINIGUN);
         //BuildBuilding(5, 0, BuildingType.TURRET_MINIGUN);
 
-        //BuildBuilding(4, 0, BuildingType.TURRET_MINIGUN);
-        //BuildBuilding(3, 0, BuildingType.POWER_STATION);
+        BuildBuilding(4, 0, BuildingType.POWER_STATION);
+        BuildBuilding(3, 0, BuildingType.POWER_STATION);
         //BuildBuilding(2, 0, BuildingType.POWER_STATION);
         //BuildBuilding(6, 0, BuildingType.POWER_STATION);
-        //BuildBuilding(5, 0, BuildingType.POWER_STATION);
+        BuildBuilding(5, 0, BuildingType.POWER_STATION);
 	}
 
 

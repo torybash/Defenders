@@ -5,14 +5,14 @@ using System.Collections.Generic;
 public class SpriteLibrary : MonoBehaviour {
 
 	[SerializeField] List<BuildingSprite> buildingSprites;
-	Dictionary<BuildingType, BuildingSprite> buildingSpritesDict = new Dictionary<BuildingType, BuildingSprite>();
+	Dictionary<BuildingType, BuildingSprite> buildingSpritesDict;
 
 	[SerializeField] List<EnemySprite> enemySprites;
-	Dictionary<EnemyType, Sprite> enemySpritesDict = new Dictionary<EnemyType, Sprite>();
+    Dictionary<EnemyType, Sprite> enemySpritesDict;
 
 
 	[SerializeField] List<ProjectileSprite> projectileSprites;
-	Dictionary<ProjectileType, ProjectileSprite> projectileSpritesDict = new Dictionary<ProjectileType, ProjectileSprite>();
+	Dictionary<ProjectileType, ProjectileSprite> projectileSpritesDict;
 
 
 
@@ -26,6 +26,9 @@ public class SpriteLibrary : MonoBehaviour {
 			Destroy(gameObject);
 			return;
 		}
+        buildingSpritesDict = new Dictionary<BuildingType, BuildingSprite>();
+        enemySpritesDict = new Dictionary<EnemyType, Sprite>();
+        projectileSpritesDict = new Dictionary<ProjectileType, ProjectileSprite>();
 		foreach (BuildingSprite item in buildingSprites) {
 			buildingSpritesDict.Add(item.type, item);
 		}
@@ -51,6 +54,12 @@ public class SpriteLibrary : MonoBehaviour {
 	}
 
 	public Sprite GetEnemySprite(EnemyType type){
+        if (enemySpritesDict == null) {
+            foreach (EnemySprite item in enemySprites) {
+                if (item.type == type) return item.sprite;
+            }
+            return null;
+        }
 		return enemySpritesDict[type];
 	}
 

@@ -140,9 +140,11 @@ public class GameController : MonoBehaviour {
                 foreach (Turret turret in buildingCtrl.turrets) {
                     if (turret.Stats.def.type == typ) {
                         turretAmmo[typ] += turret.Stats.def.maxAmmo;
+                        
                     }
                 }
                 //turretAmmo[typ] 
+                UpdateInfoPanel();
             }
         }
 	}

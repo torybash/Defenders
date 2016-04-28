@@ -5,15 +5,16 @@ using Holoville.HOTween;
 public class Enemy : MonoBehaviour {
 
 
+
+    EnemyAI ai;
+
 	Vector2 vel = Vector2.zero;
 
 	GameController gameCtrl;
 
-	Building currTarget;
 
 	Rigidbody2D rb;
 
-	Vector2 goalPos;
 
 	public EnemyStats stats;
 
@@ -44,40 +45,35 @@ public class Enemy : MonoBehaviour {
 
 		if (state == EnemyState.DESTROYED) return;
 
-		if (currTarget != null && currTarget.isDestroyed){
-			UpdateGoalPos();
-		}
+        if (ai.shouldUpdate) ai.UpdateGoalPos(transform.position);
+
+
 
 //		Debug.Log("vel.VectorAngle(): " + vel.VectorAngle());
 		transform.rotation = Quaternion.AngleAxis(vel.VectorAngle()+90f, Vector3.forward);
 	}
 
-	private void UpdateGoalPos(){
-		currTarget = gameCtrl.buildingCtrl.GetClosestBuilding(transform.position);
-		goalPos = Vector2.zero;
-		if (currTarget == null){
-			goalPos = transform.position;
-		}else{
-			goalPos = currTarget.transform.position;
-		}
-
-
-
-		
-	}
+    //private void UpdateGoalPos(){
+    //    currTarget = gameCtrl.buildingCtrl.GetClosestBuilding(transform.position);
+    //    goalPos = Vector2.zero;
+    //    if (currTarget == null){
+    //        goalPos = transform.position;
+    //    }else{
+    //        goalPos = currTarget.transform.position;
+    //    }
+    //}
 
 	void FixedUpdate(){ 
 		if (state == EnemyState.DESTROYED) return;
 
 //		Debug.Log("stats.def.speed: " +stats.def.speed);
 		GetComponent<Rigidbody2D>().AddForce(-rb.velocity, ForceMode2D.Impulse); //stop velocity
-		vel = (goalPos - (Vector2)transform.position).normalized * stats.def.speed;
+		vel = ai.direction * stats.def.speed;
 		GetComponent<Rigidbody2D>().AddForce(vel, ForceMode2D.Impulse);
 	}
 
 
 	public void Init(EnemyDefinition def){
-		UpdateGoalPos();
 
 		stats.def = def;
 		stats.currHp = def.maxHp;
@@ -90,6 +86,27 @@ public class Enemy : MonoBehaviour {
 
 		//Set collider
 		GetComponent<BoxCollider2D>().size = sr.sprite.bounds.size;
+
+        //Set AI
+        switch (def.type) {
+            case EnemyType.WALKER:
+                ai = new BuildingDiverAI();
+                break;
+            case EnemyType.ROVER:
+                ai = new StraightDownAI();
+                break;
+            case EnemyType.BIKE:
+                ai = new BuildingDiverAI();
+                break;
+            case EnemyType.PLANE:
+                ai = new StraightDownAI();
+                break;
+            default:
+                break;
+        }
+
+        ai.UpdateGoalPos(transform.position);
+
 	}
 
 
@@ -220,9 +237,62 @@ public class Enemy : MonoBehaviour {
 
 }
 
+
+
+
 [System.Serializable]
 public class EnemyStats{
 	public EnemyDefinition def;
 	public int currHp;
 	
+}
+
+
+public class EnemyAI {
+
+    public bool shouldUpdate;
+    public Vector2 direction;
+
+    //public Vector2 goalPos;
+
+    //Building currBuildingTarget;
+
+    public virtual void UpdateGoalPos(Vector2 enemyPos) { }
+
+}
+
+public class StraightDownAI : EnemyAI {
+
+    public StraightDownAI() {
+        direction = Vector2.down;
+        shouldUpdate = false;
+    }
+
+    public override void UpdateGoalPos(Vector2 enemyPos) {
+    }
+}
+
+public class BuildingDiverAI : EnemyAI {
+    public Vector2 goalPos;
+
+    Building currBuildingTarget;
+
+    public BuildingDiverAI() {
+        shouldUpdate = true;
+    }
+
+    public override void UpdateGoalPos(Vector2 enemyPos) {
+
+        if (currBuildingTarget == null || currBuildingTarget.isDestroyed) {
+            currBuildingTarget = GameController.I.buildingCtrl.GetClosestBuilding(enemyPos);
+            goalPos = Vector2.zero;
+            if (currBuildingTarget == null) {
+                goalPos = enemyPos;
+            } else {
+                goalPos = currBuildingTarget.transform.position;
+            }
+
+            direction = (goalPos - enemyPos).normalized;
+        }
+    }
 }
